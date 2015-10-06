@@ -2,9 +2,6 @@ package poly.io
 
 import java.nio.file.attribute._
 import java.time._
-
-import scala.collection._
-
 import java.io._
 import java.nio.file.{Files => JFiles, Paths => JPaths, Path => JPath, _}
 import scala.collection._
@@ -14,11 +11,11 @@ import scala.collection._
  */
 case class File(directory: Directory, name: String) extends BaseFile {
 
-  val j = JPaths.get(fullName)
-  def fullName = directory.fullName + FileSystem.separator + name
+  private[io] val j = JPaths.get(fullName)
   require(JFiles.isRegularFile(j), s"$fullName is not a valid file.")
 
-  def fileName = name
+  /** Returns the full name (including the absolute path) of this file. */
+  def fullName = directory.fullName + FileSystem.separator + name
 
   def extension: String = {
     val dotPos = name.lastIndexOf('.')

@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
  */
 abstract class BaseFile {
 
-  def j: JPath
+  private[io] def j: JPath
   def fullName: String
 
   //region Filesystem attributes

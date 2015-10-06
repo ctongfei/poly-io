@@ -9,22 +9,28 @@ import scala.collection._
 /**
  * Represents an absolute directory on the local file system.
  * @author Tongfei Chen (ctongfei@gmail.com).
+ * @since 0.1.0
  */
 case class Directory(path: Array[String]) extends BaseFile {
 
-  val j = JPaths.get(fullName)
+  private[io] val j = JPaths.get(fullName)
   require(JFiles.isDirectory(j), s"$fullName is not a valid directory.")
 
+  /** Returns the full name (including the whole absolute path) of this directory. */
   def fullName = FileSystem.prefix + path.mkString(FileSystem.separator)
 
+  /** Returns the name of this directory (the name of the folder). */
   def name = path.last
 
   //region Navigation
+  /** Returns the parent directory of this directory. */
   def parent = Directory(path.init)
 
+  /** Returns a lazy list of subdirectories of this directory. */
   def subdirectories: Iterable[Directory] = new Iterable[Directory] {
     def iterator = JFiles.newDirectoryStream(j).iterator().filter(d => JFiles.isDirectory(d)).map(Directory.fromJavaPath)
   }
+
 
   def recursiveSubdirectories: Iterable[Directory] = new Iterable[Directory] {
     def iterator = JFiles.walk(j).iterator().drop(1).filter(d => JFiles.isDirectory(d)).map(Directory.fromJavaPath)
@@ -111,6 +117,8 @@ case class Directory(path: Array[String]) extends BaseFile {
 }
 
 object Directory {
+
+  object Root extends Directory(Array())
 
   /** Returns the upper semilattice on the set of directories based on the parent/children relation. */
   implicit object UpperSemilattice extends UpperSemilattice[Directory] {
