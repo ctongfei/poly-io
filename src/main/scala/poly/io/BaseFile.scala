@@ -13,8 +13,6 @@ abstract class BaseFile {
   def j: JPath
   def fullName: String
 
-
-
   //region Filesystem attributes
   def isDirectory = JFiles.isDirectory(j)
   def isRegularFile = JFiles.isRegularFile(j)
@@ -23,6 +21,7 @@ abstract class BaseFile {
   def isExecutable = JFiles.isExecutable(j)
   def isReadable = JFiles.isReadable(j)
   def isWritable = JFiles.isWritable(j)
+  //endregion
   
   //region POSIX permissions
   def permissions: mutable.Set[PosixFilePermission] = new mutable.Set[PosixFilePermission] {

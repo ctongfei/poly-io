@@ -1,5 +1,8 @@
 package poly.io
 
+import java.nio.file.attribute._
+import java.time._
+
 import scala.collection._
 
 import java.io._
@@ -118,7 +121,7 @@ case class File(directory: Directory, name: String) extends BaseFile {
 
   def lineWriter(implicit encoding: Encoding): Observer[String] = new Observer[String] {
     val writer = JFiles.newBufferedWriter(j, encoding.charset)
-    def write(l: String) = writer.write(l)
+    def write(l: String) = {writer.write(l); writer.newLine() }
     def close() = writer.close()
   }
 
@@ -144,9 +147,20 @@ case class File(directory: Directory, name: String) extends BaseFile {
 
   def copyTo(dir: Directory): Unit = JFiles.copy(j, dir.j.resolve(name))
 
+  def copyToOverwrite(dir: Directory): Unit = JFiles.copy(j, dir.j.resolve(name), StandardCopyOption.REPLACE_EXISTING)
+  //endregion
+
+  def touch(time: Instant = Instant.now) = JFiles.setLastModifiedTime(j, FileTime.from(time))
+
+  def lastModifiedTime = JFiles.getLastModifiedTime(j).toInstant
 
   override def toString = fullName
+  override def equals(that: Any) = that match {
+    case that: File => this.fullName == that.fullName
+    case _ => false
+  }
 
+  override def hashCode = fullName.hashCode
 
 }
 
@@ -158,7 +172,7 @@ object File {
 
   def fromJavaPath(j: JPath): File = {
     require(j.toString.startsWith(FileSystem.prefix))
-    val tokens = j.toString.substring(FileSystem.prefix.length).split(FileSystem.separator)
+    val tokens = j.normalize.toString.substring(FileSystem.prefix.length).split(FileSystem.separator)
     File(Directory(tokens.init), tokens.last)
   }
 }

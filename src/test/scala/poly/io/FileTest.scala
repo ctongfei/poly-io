@@ -7,7 +7,7 @@ object FileTest extends App {
 
   val r = Directory("/Users/tongfei/my/proj/sbt/poly-io/test")
 
-  r.createIfNotExist("a.txt")
+  r.createFileIfNotExist("a.txt")
   val a = r /! "a.txt"
   println(a.extension)
 
