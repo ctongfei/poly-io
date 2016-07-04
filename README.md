@@ -6,5 +6,5 @@
 ```scala
     resolvers += Resolver.sonatypeRepo("snapshots")
     
-    libraryDependencies += "me.tongfei" %% "poly-io" % "0.1.0-SNAPSHOT"
+    libraryDependencies += "me.tongfei" %% "poly-io" % "0.2.0-SNAPSHOT"
 ```
