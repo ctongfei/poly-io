@@ -1,10 +1,12 @@
 package poly
 
-
-/**
- * @author Tongfei Chen (ctongfei@gmail.com).
- */
 package object io {
+
+  type Closeable = java.io.Closeable
+
+  type InputStream = java.io.InputStream
+
+  type OutputStream = java.io.OutputStream
 
   type PosixFilePermission = java.nio.file.attribute.PosixFilePermission
 

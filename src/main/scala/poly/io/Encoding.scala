@@ -5,7 +5,8 @@ import java.nio.charset._
 /**
  * A wrapper for `java.nio.charset.Charset` that represents a codec that can encode
  * and decode between a sequence of characters and their encoded byte sequence.
- * @author Tongfei Chen (ctongfei@gmail.com).
+ * @author Tongfei Chen
+ * @since 0.1.0
  */
 class Encoding(val charset: Charset)
 
