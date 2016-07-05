@@ -6,6 +6,6 @@ package poly.io
 trait SymLink[S <: FileSystem[S]] { self: S#SymLink =>
 
   /** Returns the target of this symbolic link. */
-  def target: S#Path
+  def target: fileSystem.Path
 
 }

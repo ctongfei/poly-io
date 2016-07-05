@@ -1,7 +1,7 @@
 package poly.io
 
-
 /**
+ * Represents an abstract path under a specific file system.
  *
  * @tparam S Type of file system.
  * @author Tongfei Chen
@@ -41,14 +41,19 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
   // PATH MANIPULATION
 
   /** Returns the parent directory of this path. */
-  def parent: S#Directory = fileSystem.directory(path.init)
+  def parent: fileSystem.Directory = fileSystem.directory(path.init)
 
-  def relativize(that: S#Directory) = new RelativeDirectory(util.relativize(self.path, that.path))
-  def relativize(that: S#File) = new RelativeFile(util.relativize(self.path, that.path))
-  def relativize(that: S#Path) = new RelativePath(util.relativize(self.path, that.path))
+  def relativize(that: fileSystem.Directory) = new RelativeDirectory(util.relativize(self.path, that.path))
+  def relativize(that: fileSystem.File) = new RelativeFile(util.relativize(self.path, that.path))
+  def relativize(that: fileSystem.Path) = new RelativePath(util.relativize(self.path, that.path))
 
-  def resolve(rd: RelativeDirectory): S#Directory = fileSystem.directory(util.resolve(self.path, rd.path))
-  def resolve(rf: RelativeFile): S#File = fileSystem.file(util.resolve(self.path, rf.path))
+  def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.directory(util.resolve(self.path, rd.path))
+  def resolve(rf: RelativeFile): fileSystem.File = fileSystem.file(util.resolve(self.path, rf.path))
+  def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.symLink(util.resolve(self.path, rl.path))
+
+  def /(rd: RelativeDirectory): fileSystem.Directory = resolve(rd)
+  def /(rf: RelativeFile): fileSystem.File = resolve(rf)
+  def /(rl: RelativeSymLink): fileSystem.SymLink = resolve(rl)
 
   // PERMISSIONS
   def permissions: scala.collection.mutable.Set[PosixFilePermission]
@@ -62,7 +67,7 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
 
   def copyTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferring[S, DS]) = ft.copyTo(self, destination)
 
-  /** Removes this file. */
+  /** Removes this file or directory. */
   def delete(): Unit
 
   // OVERRIDING JVM MEMBERS
@@ -70,15 +75,12 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
   override def hashCode = fullName.hashCode
 
   override def equals(that: Any) = that match {
-    case that: S#Path => (this.fileSystem eq that.fileSystem) && this.fullName == that.fullName
+    case that: fileSystem.Path => (this.fileSystem eq that.fileSystem) && this.fullName == that.fullName
     case _ => false
   }
 
   override def toString = fullName
 
 }
-
-
-
 
 

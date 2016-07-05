@@ -7,29 +7,29 @@ package poly.io
  */
 trait Directory[S <: FileSystem[S]] extends Path[S] { self: S#Directory =>
 
-  def children: Iterable[S#Path]
+  def children: Iterable[fileSystem.Path]
 
-  def subdirectories: Iterable[S#Directory]
+  def subdirectories: Iterable[fileSystem.Directory]
 
-  def files: Iterable[S#File]
+  def files: Iterable[fileSystem.File]
 
-  def recursiveSubdirectories: Iterable[S#Directory]
+  def recursiveSubdirectories: Iterable[fileSystem.Directory]
 
-  def recursiveFiles: Iterable[S#File]
+  def recursiveFiles: Iterable[fileSystem.File]
 
-  def /(s: String): S#Directory
+  def /(s: String): fileSystem.Directory
 
-  def /!(s: String): S#File
+  def /!(s: String): fileSystem.File
 
-  def /@(s: String): S#SymLink
+  def /@(s: String): fileSystem.SymLink
 
   def exists(name: String): Boolean
 
-  def createDirectory(name: String): S#Directory
+  def createDirectory(name: String): fileSystem.Directory
 
-  def createFile(name: String): S#File
+  def createFile(name: String): fileSystem.File
 
-  def createSymLink(name: String, target: S#Path): S#SymLink
+  def createSymLink(name: String, target: fileSystem.Path): fileSystem.SymLink
 
 
 }

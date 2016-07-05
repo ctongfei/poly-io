@@ -1,9 +1,12 @@
 package poly.io
 
+import poly.algebra._
+
 /**
- * Represents a path system.
- * A path system specifies its prefix and its separator.
+ * Represents a file system.
  *
+ * A file system can either be your local file system,
+ * a zip archive, or a file system on a remote server.
  * @since 0.2.0
  * @author Tongfei Chen
  */
@@ -29,8 +32,20 @@ trait FileSystem[S <: FileSystem[S]] { self: S =>
 
   def symLink(xs: Array[String]): SymLink
 
-  def relativize(self: Path, that: Directory) = new RelativeDirectory(util.relativize(self.path, that.path))
+  /** The path semilattice in this file system. */
+  implicit object PathStructure extends UpperSemilattice[Path] with Hashing[Path] with PartialOrder[Path] {
+    def sup(x: Path, y: Path) = {
+      val lx = x.path.length
+      val ly = x.path.length
+      val l = util.lcpLength(x.path, y.path)
+      if (l == lx) x
+      else if (l == ly) y
+      else directory(x.path.take(l))
+    }
+    def hash(x: Path) = x.fullName.hashCode
+    override def eq(x: Path, y: Path) = x.path sameElements y.path
+    def le(x: Path, y: Path) = y.path startsWith x.path
+  }
 
-  def resolve(self: Path, rd: RelativeDirectory): Directory = directory(util.resolve(self.path, rd.path))
 
 }
