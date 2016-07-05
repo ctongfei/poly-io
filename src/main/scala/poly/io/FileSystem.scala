@@ -32,8 +32,11 @@ trait FileSystem[S <: FileSystem[S]] { self: S =>
 
   def symLink(xs: Array[String]): SymLink
 
+  implicit def transferring: FileTransferring[S, S]
+
   /** The path semilattice in this file system. */
-  implicit object PathStructure extends UpperSemilattice[Path] with Hashing[Path] with PartialOrder[Path] {
+  implicit object PathStructure extends UpperSemilatticeWithEq[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
+    def top = root
     def sup(x: Path, y: Path) = {
       val lx = x.path.length
       val ly = x.path.length
@@ -42,9 +45,13 @@ trait FileSystem[S <: FileSystem[S]] { self: S =>
       else if (l == ly) y
       else directory(x.path.take(l))
     }
-    def hash(x: Path) = x.fullName.hashCode
-    override def eq(x: Path, y: Path) = x.path sameElements y.path
+    override def eq(x: Path, y: Path) = x == y
     def le(x: Path, y: Path) = y.path startsWith x.path
+  }
+
+  implicit object PathHashing extends Hashing[Path] {
+    def hash(x: Path) = x.##
+    def eq(x: Path, y: Path) = x == y
   }
 
 

@@ -38,6 +38,8 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
     if (dotPos == -1) name else name.substring(0, dotPos)
   }
 
+  def rename(newName: String)
+
   // PATH MANIPULATION
 
   /** Returns the parent directory of this path. */
@@ -57,6 +59,7 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
 
   // PERMISSIONS
   def permissions: scala.collection.mutable.Set[PosixFilePermission]
+  def isHidden: Boolean
   def isReadable: Boolean
   def isWriteable: Boolean
   def isExecutable: Boolean

@@ -8,7 +8,7 @@ crossScalaVersions := Seq("2.11.8", "2.12.0-M5")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-libraryDependencies += "me.tongfei" %% "poly-algebra" % "0.3.10-SNAPSHOT"
+libraryDependencies += "me.tongfei" %% "poly-algebra" % "0.3.11-SNAPSHOT"
 
 publishMavenStyle := true
 

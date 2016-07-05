@@ -18,9 +18,12 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     lazy val jp: JPath = JPaths.get(toString)
     // PERMISSIONS
     def permissions = JFiles.getPosixFilePermissions(jp)
+    def isHidden = JFiles.isHidden(jp)
     def isReadable = JFiles.isReadable(jp)
     def isWriteable = JFiles.isWritable(jp)
     def isExecutable = JFiles.isExecutable(jp)
+
+    def rename(newName: String) = JFiles.move(jp, jp.resolveSibling(newName))
 
     def delete() = this match {
       case self: Directory =>
@@ -50,7 +53,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     def /(s: String): Local.Directory = new Directory(path :+ s).asInstanceOf[Local.Directory]
     def /!(s: String): Local.File = new File(path :+ s).asInstanceOf[Local.File]
     def /@(s: String): Local.SymLink = new SymLink(path :+ s).asInstanceOf[Local.SymLink]
-    def exists(name: String) = JFiles.exists(new File(path :+ name).jp)
+    def contains(name: String) = JFiles.exists(new File(path :+ name).jp)
     def createDirectory(name: String) = j2pd(JFiles.createDirectory(new Directory(path :+ name).jp))
     def createFile(name: String) = j2pf(JFiles.createFile(new File(path :+ name).jp))
     def createSymLink(name: String, target: Local.Path) = j2pl(JFiles.createSymbolicLink(new SymLink(path :+ name).jp, target.jp))
@@ -101,6 +104,18 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
   def directory(xs: Array[String]) = new Directory(xs)
   def file(xs: Array[String]) = new File(xs)
   def symLink(xs: Array[String]) = new SymLink(xs)
+
+  implicit object transferring extends FileTransferring[Local, Local] {
+
+    def copyTo(f: Local#Path, d: Local#Directory) = f match {
+      case f: Local.Directory =>
+        for (c <- f.children) copyTo(c, d / f.name)
+      case _ =>
+        JFiles.copy(f.jp, d.jp.resolve(f.name))
+    }
+
+    def moveTo(f: Local#Path, d: Local#Directory) = JFiles.move(f.jp, d.jp.resolve(f.name))
+  }
 }
 
 // Local#Path and Local.Path is actually the same type: there is only one instance of the trait Local
@@ -120,16 +135,6 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
  */
 object Local extends Local {
 
-  implicit object FileTransferring extends FileTransferring[Local, Local] {
 
-    def copyTo(f: Local#Path, d: Local#Directory) = f match {
-      case f: Local.Directory =>
-        for (c <- f.children) copyTo(c, d / f.name)
-      case _ =>
-        JFiles.copy(f.jp, d.jp.resolve(f.name))
-    }
-
-    def moveTo(f: Local#Path, d: Local#Directory) = JFiles.move(f.jp, d.jp.resolve(f.name))
-  }
 
 }

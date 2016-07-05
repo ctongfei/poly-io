@@ -23,7 +23,9 @@ trait Directory[S <: FileSystem[S]] extends Path[S] { self: S#Directory =>
 
   def /@(s: String): fileSystem.SymLink
 
-  def exists(name: String): Boolean
+  def clear(): Unit = for (c <- children) c.delete()
+
+  def contains(name: String): Boolean
 
   def createDirectory(name: String): fileSystem.Directory
 
