@@ -23,6 +23,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     def isWriteable = JFiles.isWritable(jp)
     def isExecutable = JFiles.isExecutable(jp)
 
+    /** Renames this file or directory or symbolic link. */
     def rename(newName: String) = JFiles.move(jp, jp.resolveSibling(newName))
 
     def delete() = this match {
@@ -77,24 +78,24 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     def target = j2pd(JFiles.readSymbolicLink(jp))
   }
 
-  private def p2j(p: Path) = JPaths.get(p.fullName)
+  private[poly] def p2j(p: Path) = JPaths.get(p.fullName)
 
-  private def j2pf(p: JPath): Local.File = {
-    val s = p.normalize().toString
+  private[poly] def j2pf(p: JPath): Local.File = {
+    val s = p.normalize().toAbsolutePath.toString
     new File(s.substring(prefix.length).split(separator)).asInstanceOf[Local.File]
   }
 
-  private def j2pd(p: JPath): Local.Directory = {
-    val s = p.normalize().toString
+  private[poly] def j2pd(p: JPath): Local.Directory = {
+    val s = p.normalize().toAbsolutePath.toString
     new Directory(s.substring(prefix.length).split(separator)).asInstanceOf[Local.Directory]
   }
 
-  private def j2pl(p: JPath): Local.SymLink = {
-    val s = p.normalize().toString
+  private[poly] def j2pl(p: JPath): Local.SymLink = {
+    val s = p.normalize().toAbsolutePath.toString
     new SymLink(s.substring(prefix.length).split(separator)).asInstanceOf[Local.SymLink]
   }
 
-  private def j2pp(p: JPath): Local.Path = {
+  private[poly] def j2pp(p: JPath): Local.Path = {
     if (JFiles.isRegularFile(p)) j2pf(p)
     else if (JFiles.isDirectory(p)) j2pd(p)
     else j2pl(p)
@@ -105,8 +106,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
   def file(xs: Array[String]) = new File(xs)
   def symLink(xs: Array[String]) = new SymLink(xs)
 
-  implicit object transferring extends FileTransferring[Local, Local] {
-
+  implicit object transferProvider extends FileTransferProvider[Local, Local] {
     def copyTo(f: Local#Path, d: Local#Directory) = f match {
       case f: Local.Directory =>
         for (c <- f.children) copyTo(c, d / f.name)
@@ -133,8 +133,4 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
  * Represents the local file system.
  * @since 0.2.0
  */
-object Local extends Local {
-
-
-
-}
+object Local extends Local

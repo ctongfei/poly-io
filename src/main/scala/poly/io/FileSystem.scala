@@ -32,9 +32,9 @@ trait FileSystem[S <: FileSystem[S]] { self: S =>
 
   def symLink(xs: Array[String]): SymLink
 
-  implicit def transferring: FileTransferring[S, S]
+  implicit def transferProvider: FileTransferProvider[S, S]
 
-  /** The path semilattice in this file system. */
+  /** The path semilattice / partial order of this file system. */
   implicit object PathStructure extends UpperSemilatticeWithEq[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
     def top = root
     def sup(x: Path, y: Path) = {

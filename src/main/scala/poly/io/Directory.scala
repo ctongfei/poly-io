@@ -33,5 +33,4 @@ trait Directory[S <: FileSystem[S]] extends Path[S] { self: S#Directory =>
 
   def createSymLink(name: String, target: fileSystem.Path): fileSystem.SymLink
 
-
 }

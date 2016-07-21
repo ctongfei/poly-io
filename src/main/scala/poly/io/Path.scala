@@ -6,12 +6,19 @@ package poly.io
  * @tparam S Type of file system.
  * @author Tongfei Chen
  * @since 0.2.0
- */
+ */ //TODO: poly.collection.node.BiOrderedTreeNode
 trait Path[S <: FileSystem[S]] { self: S#Path =>
 
+  /** Returns a reference to the file system in which this file resides. */
   val fileSystem: S
 
+  /** Returns an array of the components of this path.
+   * @example {{{
+   *   Directory("/home/admin/projects") = ("home", "admin", "projects")
+   * }}} */
   def path: Array[String]
+
+
 
   // NAME MANIPULATION
 
@@ -38,7 +45,7 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
     if (dotPos == -1) name else name.substring(0, dotPos)
   }
 
-  def rename(newName: String)
+  def rename(newName: String): Unit
 
   // PATH MANIPULATION
 
@@ -66,9 +73,9 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
 
   // COPYING & MOVING
 
-  def moveTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferring[S, DS]) = ft.moveTo(self, destination)
+  def moveTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.moveTo(self, destination)
 
-  def copyTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferring[S, DS]) = ft.copyTo(self, destination)
+  def copyTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.copyTo(self, destination)
 
   /** Removes this file or directory. */
   def delete(): Unit
