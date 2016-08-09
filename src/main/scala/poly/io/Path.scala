@@ -18,8 +18,6 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
    * }}} */
   def path: Array[String]
 
-
-
   // NAME MANIPULATION
 
   /** Returns the full name (including the absolute path) of this file. */
@@ -30,7 +28,7 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
 
   /**
    * Returns the extension of this file. The extension is lowercased.
-   * @return If there's no extension, return the empty string `""`.
+   * @return If there's no extension, the empty string `""` is returned.
    */
   def extension = {
     val dotPos = name.lastIndexOf('.')
@@ -59,6 +57,15 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
   def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.directory(util.resolve(self.path, rd.path))
   def resolve(rf: RelativeFile): fileSystem.File = fileSystem.file(util.resolve(self.path, rf.path))
   def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.symLink(util.resolve(self.path, rl.path))
+
+  /** Returns the lowest common ancestor of two paths in the same file system.
+   * @example {{{
+   *    Directory("/home/a") lca Directory("/home/b") == Directory("/home")
+   * }}}
+   */
+  def lca(that: fileSystem.Path) =
+    fileSystem.PathStructure.sup(self.asInstanceOf[fileSystem.Path], that)
+    // the typecast is actually safe: self is actually an instance of fileSystem.Path
 
   def /(rd: RelativeDirectory): fileSystem.Directory = resolve(rd)
   def /(rf: RelativeFile): fileSystem.File = resolve(rf)

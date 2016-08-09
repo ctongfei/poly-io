@@ -34,6 +34,10 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     }
   }
 
+  object Path {
+    def apply(s: String) = j2pp(JPaths.get(s))
+  }
+
   class File(val path: Array[String]) extends Path with poly.io.File[Local] {
     def size = JFiles.size(jp)
     def inputStream = JFiles.newInputStream(jp)
@@ -45,8 +49,8 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
   }
 
   class Directory(val path: Array[String]) extends Path with poly.io.Directory[Local] {
-
     def children = JFiles.list(jp).iterator().toIterable.map(j2pp)
+    def recursiveChildren = JFiles.walk(jp).iterator().toIterable.map(j2pd)
     def subdirectories = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
     def files = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
     def recursiveSubdirectories = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
@@ -102,6 +106,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
   }
 
   def root = Directory.root.asInstanceOf[Directory]
+
   def directory(xs: Array[String]) = new Directory(xs)
   def file(xs: Array[String]) = new File(xs)
   def symLink(xs: Array[String]) = new SymLink(xs)
