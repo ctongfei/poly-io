@@ -7,7 +7,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.2.0
  */ //TODO: poly.collection.node.BiOrderedTreeNode
-trait Path[S <: FileSystem[S]] { self: S#Path =>
+trait Path[S <: FileSystem] { self: S#Path =>
 
   /** Returns a reference to the file system in which this file resides. */
   val fileSystem: S
@@ -80,9 +80,9 @@ trait Path[S <: FileSystem[S]] { self: S#Path =>
 
   // COPYING & MOVING
 
-  def moveTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.moveTo(self, destination)
+  def moveTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.moveTo(self, destination)
 
-  def copyTo[DS <: FileSystem[DS]](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.copyTo(self, destination)
+  def copyTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.copyTo(self, destination)
 
   /** Removes this file or directory. */
   def delete(): Unit

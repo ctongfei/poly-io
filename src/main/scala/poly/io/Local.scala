@@ -8,12 +8,12 @@ import scala.collection.JavaConversions._
  * @author Tongfei Chen
  * @since 0.2.0
  */
-sealed trait Local extends FileSystem[Local] { self: Local =>
+object Local extends FileSystem {
 
   val prefix = if (System.getProperty("os.name").startsWith("Windows")) "" else "/"
   val separator = if (System.getProperty("os.name").startsWith("Windows")) "\\" else "/"
 
-  sealed abstract class Path extends poly.io.Path[Local] {
+  sealed abstract class Path extends poly.io.Path[Local.type] {
     val fileSystem = Local
     lazy val jp: JPath = JPaths.get(toString)
     // PERMISSIONS
@@ -38,7 +38,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     def apply(s: String) = j2pp(JPaths.get(s))
   }
 
-  class File(val path: Array[String]) extends Path with poly.io.File[Local] {
+  class File(val path: Array[String]) extends Path with poly.io.File[Local.type] {
     def size = JFiles.size(jp)
     def inputStream = JFiles.newInputStream(jp)
     def outputStream = JFiles.newOutputStream(jp)
@@ -48,16 +48,16 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     def apply(s: String) = j2pf(JPaths.get(s))
   }
 
-  class Directory(val path: Array[String]) extends Path with poly.io.Directory[Local] {
+  class Directory(val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
     def children = JFiles.list(jp).iterator().toIterable.map(j2pp)
     def recursiveChildren = JFiles.walk(jp).iterator().toIterable.map(j2pd)
     def subdirectories = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
     def files = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
     def recursiveSubdirectories = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
     def recursiveFiles = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
-    def /(s: String): Local.Directory = new Directory(path :+ s).asInstanceOf[Local.Directory]
-    def /!(s: String): Local.File = new File(path :+ s).asInstanceOf[Local.File]
-    def /@(s: String): Local.SymLink = new SymLink(path :+ s).asInstanceOf[Local.SymLink]
+    def /(s: String): Local.Directory = new Directory(path :+ s)
+    def /!(s: String): Local.File = new File(path :+ s)
+    def /@(s: String): Local.SymLink = new SymLink(path :+ s)
     def contains(name: String) = JFiles.exists(new File(path :+ name).jp)
     def createDirectory(name: String) = j2pd(JFiles.createDirectory(new Directory(path :+ name).jp))
     def createFile(name: String) = j2pf(JFiles.createFile(new File(path :+ name).jp))
@@ -78,7 +78,7 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
     lazy val cwd = Directory(System.getProperty("user.dir"))
   }
 
-  class SymLink(val path: Array[String]) extends Path with poly.io.SymLink[Local] {
+  class SymLink(val path: Array[String]) extends Path with poly.io.SymLink[Local.type] {
     def target = j2pd(JFiles.readSymbolicLink(jp))
   }
 
@@ -86,17 +86,17 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
 
   private[poly] def j2pf(p: JPath): Local.File = {
     val s = p.normalize().toAbsolutePath.toString
-    new File(s.substring(prefix.length).split(separator)).asInstanceOf[Local.File]
+    new File(s.substring(prefix.length).split(separator))
   }
 
   private[poly] def j2pd(p: JPath): Local.Directory = {
     val s = p.normalize().toAbsolutePath.toString
-    new Directory(s.substring(prefix.length).split(separator)).asInstanceOf[Local.Directory]
+    new Directory(s.substring(prefix.length).split(separator))
   }
 
   private[poly] def j2pl(p: JPath): Local.SymLink = {
     val s = p.normalize().toAbsolutePath.toString
-    new SymLink(s.substring(prefix.length).split(separator)).asInstanceOf[Local.SymLink]
+    new SymLink(s.substring(prefix.length).split(separator))
   }
 
   private[poly] def j2pp(p: JPath): Local.Path = {
@@ -111,31 +111,14 @@ sealed trait Local extends FileSystem[Local] { self: Local =>
   def file(xs: Array[String]) = new File(xs)
   def symLink(xs: Array[String]) = new SymLink(xs)
 
-  implicit object transferProvider extends FileTransferProvider[Local, Local] {
-    def copyTo(f: Local#Path, d: Local#Directory) = f match {
+  implicit object transferProvider extends FileTransferProvider[Local.type, Local.type] {
+    def copyTo(f: Local.Path, d: Local.Directory): Unit = f match {
       case f: Local.Directory =>
         for (c <- f.children) copyTo(c, d / f.name)
       case _ =>
         JFiles.copy(f.jp, d.jp.resolve(f.name))
     }
 
-    def moveTo(f: Local#Path, d: Local#Directory) = JFiles.move(f.jp, d.jp.resolve(f.name))
+    def moveTo(f: Local.Path, d: Local.Directory) = JFiles.move(f.jp, d.jp.resolve(f.name))
   }
 }
-
-// Local#Path and Local.Path is actually the same type: there is only one instance of the trait Local
-// Should be able to write {{{
-//   object Local extends FileSystem[Local.type]
-// }}}
-// However due to a compiler bug this is not currently possible.
-// Blocking on SI-9844: https://issues.scala-lang.org/browse/SI-9844
-// See http://stackoverflow.com/questions/32203867/scala-f-bounded-polymorphism-on-object.
-// See https://github.com/scala/scala/commit/ca4c5020d3d2e8e843a44279cbcf9585931cb26f.
-//
-// Current workaround: a lot of `asInstanceOf`s scattered around the code to convert
-// Local#Path to Local.Path.
-/**
- * Represents the local file system.
- * @since 0.2.0
- */
-object Local extends Local

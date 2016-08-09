@@ -7,7 +7,7 @@ import poly.io.conversion._
  * @author Tongfei Chen
  * @since 0.2.0
  */
-trait File[S <: FileSystem[S]] extends Path[S] { self: S#File =>
+trait File[S <: FileSystem] extends Path[S] { self: S#File =>
 
   /** Returns the number of bytes in this file. */
   def size: Long

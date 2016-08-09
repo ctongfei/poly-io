@@ -5,7 +5,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.2.0
  */
-trait Directory[S <: FileSystem[S]] extends Path[S] { self: S#Directory =>
+trait Directory[S <: FileSystem] extends Path[S] { self: S#Directory =>
 
   /** Returns an iterable sequence of all the immediate children of this directory. */
   def children: Iterable[fileSystem.Path]

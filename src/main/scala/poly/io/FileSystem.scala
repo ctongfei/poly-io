@@ -10,19 +10,19 @@ import poly.algebra._
  * @since 0.2.0
  * @author Tongfei Chen
  */
-trait FileSystem[S <: FileSystem[S]] { self: S =>
+trait FileSystem { self =>
 
   def prefix: String
 
   def separator: String
 
-  type Path <: poly.io.Path[S]
+  type Path <: poly.io.Path[this.type]
 
-  type Directory <: poly.io.Directory[S] with Path
+  type Directory <: poly.io.Directory[this.type] with Path
 
-  type File <: poly.io.File[S] with Path
+  type File <: poly.io.File[this.type] with Path
 
-  type SymLink <: poly.io.SymLink[S] with Path
+  type SymLink <: poly.io.SymLink[this.type] with Path
 
   def root: Directory
 
@@ -32,7 +32,7 @@ trait FileSystem[S <: FileSystem[S]] { self: S =>
 
   def symLink(xs: Array[String]): SymLink
 
-  implicit def transferProvider: FileTransferProvider[S, S]
+  implicit def transferProvider: FileTransferProvider[this.type, this.type]
 
   /** The path semilattice / partial order of this file system. */
   implicit object PathStructure extends UpperSemilatticeWithEq[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
