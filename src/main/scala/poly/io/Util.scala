@@ -5,7 +5,7 @@ import scala.collection.mutable._
 /**
  * @author Tongfei Chen
  */
-private[poly] object util {
+private[poly] object Util {
 
   private[poly] def lcpLength(xs: Array[String], ys: Array[String]) = {
     var i = 0

@@ -50,11 +50,11 @@ object Local extends FileSystem {
 
   class Directory(val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
     def children = JFiles.list(jp).iterator().toIterable.map(j2pp)
-    def recursiveChildren = JFiles.walk(jp).iterator().toIterable.map(j2pd)
+    override def recursiveChildren = JFiles.walk(jp).iterator().toIterable.map(j2pd)
     def subdirectories = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
     def files = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
-    def recursiveSubdirectories = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
-    def recursiveFiles = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
+    override def recursiveSubdirectories = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd) //TODO: lazify!
+    override def recursiveFiles = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
     def /(s: String): Local.Directory = new Directory(path :+ s)
     def /!(s: String): Local.File = new File(path :+ s)
     def /@(s: String): Local.SymLink = new SymLink(path :+ s)
@@ -78,7 +78,7 @@ object Local extends FileSystem {
     lazy val cwd = Directory(System.getProperty("user.dir"))
   }
 
-  class SymLink(val path: Array[String]) extends Path with poly.io.SymLink[Local.type] {
+  class SymLink(val path: Array[String]) extends Path with poly.io.ReadOnlySymLink[Local.type] {
     def target = j2pd(JFiles.readSymbolicLink(jp))
   }
 
@@ -105,7 +105,7 @@ object Local extends FileSystem {
     else j2pl(p)
   }
 
-  def root = Directory.root.asInstanceOf[Directory]
+  def root = Directory.root
 
   def directory(xs: Array[String]) = new Directory(xs)
   def file(xs: Array[String]) = new File(xs)
