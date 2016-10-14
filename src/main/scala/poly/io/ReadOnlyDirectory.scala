@@ -1,6 +1,7 @@
 package poly.io
 
-import poly.io.util._
+import poly.io.Util._
+import scala.collection.{Map, DefaultMap}
 
 /**
  * Represents a directory in a read-only file system.
@@ -13,10 +14,16 @@ trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self:
   /** Returns an iterable sequence of all the immediate children of this directory. */
   def children: Iterable[fileSystem.Path]
 
+  /** Returns an map that maps file names to their path object. */
+  def childrenMap: Map[String, fileSystem.Path] = new DefaultMap[String, fileSystem.Path] {
+    def get(k: String) = if (self.contains(k)) Some(self.fileSystem.getPath(self.path :+ k)) else None
+    def iterator = children.iterator.map(p => p.name -> p)
+  }
+
   /** Returns an iterable sequence of all children of this directory, recursively. */
   def recursiveChildren: Iterable[fileSystem.Path] = new Iterable[fileSystem.Path] {
     def iterator = new DepthFirstTreeSearcher[fileSystem.Path](self.asInstanceOf[fileSystem.Path])(p => p match {
-        case d: poly.io.ReadOnlyDirectory[fileSystem.type] if d.isDirectory => d.children
+        case d: poly.io.ReadOnlyDirectory[fileSystem.type] if d.isDirectory => d.children // type checking is erased!
         case _ => Traversable.empty
       }
     )

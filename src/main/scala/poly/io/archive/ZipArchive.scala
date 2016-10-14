@@ -2,7 +2,6 @@ package poly.io.archive
 
 import poly.io._
 import java.util.zip._
-
 import scala.collection.mutable
 import scala.collection.JavaConversions._
 
@@ -11,17 +10,18 @@ import scala.collection.JavaConversions._
  * @author Tongfei Chen
  * @since 0.3.0
  */
-class ZipArchive private(zf: Local.File, enc: Encoding) extends ReadOnlyFileSystem { z =>
+class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFileSystem { zip =>
 
-  val prefix: String = s"zip:$zf!${zf.fileSystem.separator}"
+  def prefix = s"zip:$zf!${zf.fileSystem.separator}"
   def separator = zf.fileSystem.separator
 
+  /** Returns the root directory of this file system. */
   val root = new Directory(Array())
 
   private[this] val jzf = new ZipFile(zf.toString, enc.charset)
 
-  private[this] def createDirectory(path: Array[String]): z.Directory = {
-    var dir: z.Directory = root
+  private[this] def createDirectory(path: Array[String]): zip.Directory = {
+    var dir: zip.Directory = root
     for (p <- path) {
       if (!(dir.ch contains p))
         dir.ch += p -> new Directory(dir.path :+ p)
@@ -35,22 +35,23 @@ class ZipArchive private(zf: Local.File, enc: Encoding) extends ReadOnlyFileSyst
     dir.ch += path.last -> new File(path, ze)
   }
 
+  // Constructor: construct the tree structure inside this zip archive
   for (ze <- jzf.stream.iterator) {
     val name = ze.getName
     if (name endsWith "/") createDirectory(name.split('/').filter(_ != ""))
     else createFile(name.split('/'), ze)
   }
 
-  sealed abstract class Path extends poly.io.ReadOnlyPath[z.type] {
-    val fileSystem: z.type = z
+  sealed abstract class Path extends poly.io.ReadOnlyPath[zip.type] {
+    val fileSystem: zip.type = zip
     def permissions = throw new UnsupportedOperationException("Zip archives does not support POSIX permissions")
     def isHidden = permissions
     def isReadable = true
     def isWriteable = false
     def isExecutable = permissions
-}
+  }
 
-  class Directory(val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[z.type] {
+  class Directory private[io](val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
     private[io] val ch = mutable.HashMap[String, Path]()
     def children: Iterable[Path] = ch.values
     def subdirectories: Iterable[Directory] = ch.values.collect { case d: Directory => d }
@@ -61,19 +62,28 @@ class ZipArchive private(zf: Local.File, enc: Encoding) extends ReadOnlyFileSyst
     def contains(name: String): Boolean = ch contains name
   }
 
-  class File(val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[z.type] {
+  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
     def size = ze.getSize
     def inputStream = jzf.getInputStream(ze)
   }
 
   type SymLink = Nothing
 
-  def directory(xs: Array[String]): Directory = ???
 
-  def file(xs: Array[String]): File = ???
+  def getPath(xs: Array[String]): Path = {
+    val parent = getDirectory(xs.init)
+    parent.ch(xs.last)
+  }
 
-  def symLink(xs: Array[String]): SymLink = ???
+  def getDirectory(xs: Array[String]): Directory = {
+    var c = zip.root
+    for (x <- xs) c = c.ch(x).asInstanceOf[Directory]
+    c
+  }
 
+  def getFile(xs: Array[String]): File = getPath(xs).asInstanceOf[File]
+
+  def getSymLink(xs: Array[String]) = throw new UnsupportedOperationException("Zip files do not support symbolic links.")
 }
 
 object ZipArchive {

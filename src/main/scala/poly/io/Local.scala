@@ -1,6 +1,7 @@
 package poly.io
 
 import java.nio.file.{Files => JFiles, Path => JPath, Paths => JPaths}
+import poly.io.conversion.FromJava._
 import scala.collection.JavaConversions._
 
 /**
@@ -38,7 +39,7 @@ object Local extends FileSystem {
     def apply(s: String) = j2pp(JPaths.get(s))
   }
 
-  class File(val path: Array[String]) extends Path with poly.io.File[Local.type] {
+  class File private[io](val path: Array[String]) extends Path with poly.io.File[Local.type] {
     def size = JFiles.size(jp)
     def inputStream = JFiles.newInputStream(jp)
     def outputStream = JFiles.newOutputStream(jp)
@@ -48,13 +49,13 @@ object Local extends FileSystem {
     def apply(s: String) = j2pf(JPaths.get(s))
   }
 
-  class Directory(val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
-    def children = JFiles.list(jp).iterator().toIterable.map(j2pp)
-    override def recursiveChildren = JFiles.walk(jp).iterator().toIterable.map(j2pd)
-    def subdirectories = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
-    def files = JFiles.list(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
-    override def recursiveSubdirectories = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isDirectory(f)).map(j2pd) //TODO: lazify!
-    override def recursiveFiles = JFiles.walk(jp).iterator().toIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
+  class Directory private[io](val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
+    def children = JFiles.list(jp).asIterable.map(j2pp)
+    override def recursiveChildren = JFiles.walk(jp).asIterable.map(j2pd)
+    def subdirectories = JFiles.list(jp).asIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
+    def files = JFiles.list(jp).asIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
+    override def recursiveSubdirectories = JFiles.walk(jp).asIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
+    override def recursiveFiles = JFiles.walk(jp).asIterable.filter(f => JFiles.isRegularFile(f)).map(j2pf)
     def /(s: String): Local.Directory = new Directory(path :+ s)
     def /!(s: String): Local.File = new File(path :+ s)
     def /@(s: String): Local.SymLink = new SymLink(path :+ s)
@@ -78,7 +79,7 @@ object Local extends FileSystem {
     lazy val cwd = Directory(System.getProperty("user.dir"))
   }
 
-  class SymLink(val path: Array[String]) extends Path with poly.io.ReadOnlySymLink[Local.type] {
+  class SymLink private[io](val path: Array[String]) extends Path with poly.io.ReadOnlySymLink[Local.type] {
     def target = j2pd(JFiles.readSymbolicLink(jp))
   }
 
@@ -107,9 +108,10 @@ object Local extends FileSystem {
 
   def root = Directory.root
 
-  def directory(xs: Array[String]) = new Directory(xs)
-  def file(xs: Array[String]) = new File(xs)
-  def symLink(xs: Array[String]) = new SymLink(xs)
+  def getPath(xs: Array[String]) = j2pp(JPaths.get(prefix + xs.mkString(separator)))
+  def getDirectory(xs: Array[String]) = new Directory(xs)
+  def getFile(xs: Array[String]) = new File(xs)
+  def getSymLink(xs: Array[String]) = new SymLink(xs)
 
   implicit object transferProvider extends FileTransferProvider[Local.type, Local.type] {
     def copyTo(f: Local.Path, d: Local.Directory): Unit = f match {

@@ -46,15 +46,15 @@ trait ReadOnlyPath[S <: ReadOnlyFileSystem] { self: S#Path =>
   // PATH MANIPULATION
 
   /** Returns the parent directory of this path. */
-  def parent: fileSystem.Directory = fileSystem.directory(path.init)
+  def parent: fileSystem.Directory = fileSystem.getDirectory(path.init)
 
   def relativize(that: fileSystem.Directory) = new RelativeDirectory(Util.relativize(self.path, that.path))
   def relativize(that: fileSystem.File) = new RelativeFile(Util.relativize(self.path, that.path))
   def relativize(that: fileSystem.Path) = new RelativePath(Util.relativize(self.path, that.path))
 
-  def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.directory(Util.resolve(self.path, rd.path))
-  def resolve(rf: RelativeFile): fileSystem.File = fileSystem.file(Util.resolve(self.path, rf.path))
-  def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.symLink(Util.resolve(self.path, rl.path))
+  def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.getDirectory(Util.resolve(self.path, rd.path))
+  def resolve(rf: RelativeFile): fileSystem.File = fileSystem.getFile(Util.resolve(self.path, rf.path))
+  def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.getSymLink(Util.resolve(self.path, rl.path))
 
   /** Returns the lowest common ancestor of two paths in the same file system.
    * @example {{{

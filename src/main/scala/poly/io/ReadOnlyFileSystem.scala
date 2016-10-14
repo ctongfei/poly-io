@@ -27,11 +27,13 @@ trait ReadOnlyFileSystem { self =>
   /** Returns the root directory of this file system. */
   def root: Directory
 
-  def directory(xs: Array[String]): Directory
+  def getPath(xs: Array[String]): Path
 
-  def file(xs: Array[String]): File
+  def getDirectory(xs: Array[String]): Directory
 
-  def symLink(xs: Array[String]): SymLink
+  def getFile(xs: Array[String]): File
+
+  def getSymLink(xs: Array[String]): SymLink
 
   /** The path semilattice / partial order of this file system. */
   implicit object PathStructure extends UpperSemilatticeWithEq[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
@@ -43,7 +45,7 @@ trait ReadOnlyFileSystem { self =>
 
       if (l == lx) x
       else if (l == ly) y
-      else directory(x.path.take(l))
+      else getDirectory(x.path.take(l))
     }
     override def eq(x: Path, y: Path) = x == y
     def le(x: Path, y: Path) = y.path startsWith x.path
