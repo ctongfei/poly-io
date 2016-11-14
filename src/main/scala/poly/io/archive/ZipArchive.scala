@@ -51,7 +51,7 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
     def isExecutable = permissions
   }
 
-  class Directory private(val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
+  class Directory private[io](val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
     private[io] val ch = mutable.HashMap[String, Path]()
     def children: Iterable[Path] = ch.values
     def subdirectories: Iterable[Directory] = ch.values.collect { case d: Directory => d }
@@ -62,7 +62,7 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
     def contains(name: String): Boolean = ch contains name
   }
 
-  class File private(val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
+  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
     def size = ze.getSize
     def inputStream = jzf.getInputStream(ze)
   }

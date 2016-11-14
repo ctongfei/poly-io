@@ -20,7 +20,7 @@ trait FileSystem extends ReadOnlyFileSystem { self =>
 
   type SymLink <: poly.io.ReadOnlySymLink[this.type] with Path
 
-  implicit def transferProvider: Copying[this.type, this.type]
+  implicit def copying: Copying[this.type, this.type]
 
 
 }

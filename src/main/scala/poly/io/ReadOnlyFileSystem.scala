@@ -36,7 +36,7 @@ trait ReadOnlyFileSystem { self =>
   def getSymLink(xs: Array[String]): SymLink
 
   /** The path semilattice / partial order of this file system. */
-  implicit object PathStructure extends UpperSemilatticeWithEq[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
+  implicit object PathStructure extends EqUpperSemilattice[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
   def top = root
     def sup(x: Path, y: Path) = {
       val lx = x.path.length
