@@ -113,7 +113,7 @@ object Local extends FileSystem {
   def getFile(xs: Array[String]) = new File(xs)
   def getSymLink(xs: Array[String]) = new SymLink(xs)
 
-  implicit object transferProvider extends FileTransferProvider[Local.type, Local.type] {
+  implicit object copying extends Copying[Local.type, Local.type] {
     def copyTo(f: Local.Path, d: Local.Directory): Unit = f match {
       case f: Local.Directory =>
         for (c <- f.children) copyTo(c, d / f.name)

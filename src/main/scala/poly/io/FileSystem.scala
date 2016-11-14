@@ -12,7 +12,6 @@ import poly.algebra._
  */
 trait FileSystem extends ReadOnlyFileSystem { self =>
 
-
   type Path <: poly.io.Path[this.type]
 
   type Directory <: poly.io.Directory[this.type] with Path
@@ -21,7 +20,7 @@ trait FileSystem extends ReadOnlyFileSystem { self =>
 
   type SymLink <: poly.io.ReadOnlySymLink[this.type] with Path
 
-  implicit def transferProvider: FileTransferProvider[this.type, this.type]
+  implicit def transferProvider: Copying[this.type, this.type]
 
 
 }

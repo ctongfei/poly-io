@@ -80,6 +80,9 @@ trait ReadOnlyPath[S <: ReadOnlyFileSystem] { self: S#Path =>
   def isFile: Boolean
   def isSymLink: Boolean
 
+  // COPYING
+  def copyTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: Copying[S, DS]) = ft.copyTo(self, destination)
+
   // OVERRIDING JVM MEMBERS
 
   override def hashCode = fullName.hashCode

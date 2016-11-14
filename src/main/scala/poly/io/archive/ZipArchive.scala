@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
  */
 class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFileSystem { zip =>
 
-  def prefix = s"zip:$zf!${zf.fileSystem.separator}"
+  def prefix = s"$zf!${zf.fileSystem.separator}"
   def separator = zf.fileSystem.separator
 
   /** Returns the root directory of this file system. */
@@ -51,7 +51,7 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
     def isExecutable = permissions
   }
 
-  class Directory private[io](val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
+  class Directory private(val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
     private[io] val ch = mutable.HashMap[String, Path]()
     def children: Iterable[Path] = ch.values
     def subdirectories: Iterable[Directory] = ch.values.collect { case d: Directory => d }
@@ -62,13 +62,12 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
     def contains(name: String): Boolean = ch contains name
   }
 
-  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
+  class File private(val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
     def size = ze.getSize
     def inputStream = jzf.getInputStream(ze)
   }
 
   type SymLink = Nothing
-
 
   def getPath(xs: Array[String]): Path = {
     val parent = getDirectory(xs.init)

@@ -1,12 +1,11 @@
 package poly.io.conversion
 
 import java.io._
-
-import poly.io._
-
-import scala.collection.AbstractIterable
+import scala.collection._
 import scala.collection.JavaConversions._
 import scala.language.implicitConversions
+
+import poly.io._
 
 /**
  * @author Tongfei Chen

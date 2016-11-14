@@ -13,9 +13,7 @@ trait Path[S <: FileSystem] extends ReadOnlyPath[S] { self: S#Path =>
 
   // COPYING & MOVING
 
-  def moveTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.moveTo(self, destination)
-
-  def copyTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: FileTransferProvider[S, DS]) = ft.copyTo(self, destination)
+  def moveTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: Copying[S, DS]) = ft.moveTo(self, destination)
 
   /** Removes this file or directory. */
   def delete(): Unit

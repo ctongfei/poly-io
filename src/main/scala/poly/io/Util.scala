@@ -49,7 +49,7 @@ private[poly] object Util {
    */
   class DepthFirstTreeSearcher[A](s0: A)(t: A => Traversable[A]) extends Iterator[A] {
 
-    private[this] val stack = mutable.Stack(s0)
+    private[this] val stack = mutable.ArrayStack(s0)
     private[this] var curr: A = _
 
     def hasNext = stack.nonEmpty

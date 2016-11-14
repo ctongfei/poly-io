@@ -1,10 +1,10 @@
 name := "poly-io"
-version := "0.3.0-SNAPSHOT"
-isSnapshot := true
+version := "0.3.0"
+isSnapshot := false
 scalaVersion := "2.11.8"
 organization := "me.tongfei"
 
-crossScalaVersions := Seq("2.11.8", "2.12.0-M5")
+crossScalaVersions := Seq("2.11.8", "2.12.0")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
