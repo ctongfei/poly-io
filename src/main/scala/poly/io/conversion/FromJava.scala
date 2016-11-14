@@ -1,13 +1,22 @@
 package poly.io.conversion
 
 import java.io._
-import poly.io._
+import scala.collection._
+import scala.collection.JavaConversions._
 import scala.language.implicitConversions
+
+import poly.io._
 
 /**
  * @author Tongfei Chen
  */
 object FromJava {
+
+  private[io] implicit class javaStreamAsScalaIterable[T](val juss: java.util.stream.Stream[T]) extends AnyVal {
+    def asIterable: Iterable[T] = new AbstractIterable[T] {
+      def iterator = juss.iterator()
+    }
+  }
 
   implicit def javaFileAsPoly(jif: java.io.File): Local.Path = {
     Local.j2pp(java.nio.file.Paths.get(jif.getAbsolutePath))

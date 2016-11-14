@@ -1,11 +1,11 @@
 package poly.io
 
-import scala.collection.mutable._
+import scala.collection.mutable
 
 /**
  * @author Tongfei Chen
  */
-private[poly] object util {
+private[poly] object Util {
 
   private[poly] def lcpLength(xs: Array[String], ys: Array[String]) = {
     var i = 0
@@ -18,7 +18,7 @@ private[poly] object util {
   }
 
   private[poly] def relativize(xs: Array[String], ys: Array[String]) = {
-    val a = ArrayBuffer[String]()
+    val a = mutable.ArrayBuffer[String]()
     val lcp = lcpLength(xs, ys)
     for (x ← xs.drop(lcp)) a += ".."
     for (x ← ys.drop(lcp)) a += x
@@ -26,7 +26,7 @@ private[poly] object util {
   }
 
   private[poly] def resolve(xs: Array[String], ys: Array[String]) = {
-    val a = ArrayBuffer[String](xs: _*)
+    val a = mutable.ArrayBuffer[String](xs: _*)
     for (x ← ys) {
       x match {
         case ".." => a.remove(a.size - 1)
@@ -41,6 +41,24 @@ private[poly] object util {
     val resource = r
     f(resource)
     resource.close()
+  }
+
+  /**
+   * @author Tongfei Chen
+   * TODO: To be replaced with [[poly.collection.search.DepthFirstTreeSearcher]].
+   */
+  class DepthFirstTreeSearcher[A](s0: A)(t: A => Traversable[A]) extends Iterator[A] {
+
+    private[this] val stack = mutable.Stack(s0)
+    private[this] var curr: A = _
+
+    def hasNext = stack.nonEmpty
+
+    def next() = {
+      curr = stack.pop()
+      t(curr) foreach stack.push
+      curr
+    }
   }
 
 }
