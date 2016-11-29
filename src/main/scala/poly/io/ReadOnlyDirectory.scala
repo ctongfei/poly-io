@@ -16,7 +16,7 @@ trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self:
 
   /** Returns an map that maps file names to their path object. */
   def childrenMap: Map[String, fileSystem.Path] = new DefaultMap[String, fileSystem.Path] {
-    def get(k: String) = if (self.contains(k)) Some(self.fileSystem.getPath(self.path :+ k)) else None
+    def get(k: String) = if (self.contains(k)) Some(self.fileSystem.createPath(self.path :+ k)) else None
     def iterator = children.iterator.map(p => p.name -> p)
   }
 
@@ -29,8 +29,10 @@ trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self:
     )
   }
 
+  /** Returns a lazy stream of subdirectories in this directory (not including subdirectories of subdirectories). */
   def subdirectories: Iterable[fileSystem.Directory]
 
+  /** Returns the files in this directory. */
   def files: Iterable[fileSystem.File]
 
   def recursiveSubdirectories: Iterable[fileSystem.Directory] = new Iterable[fileSystem.Directory] {

@@ -1,7 +1,5 @@
 package poly.io
 
-import poly.algebra._
-
 /**
  * Represents a read-only file system.
  *
@@ -27,32 +25,12 @@ trait ReadOnlyFileSystem { self =>
   /** Returns the root directory of this file system. */
   def root: Directory
 
-  def getPath(xs: Array[String]): Path
+  def createPath(xs: Array[String]): Path
 
-  def getDirectory(xs: Array[String]): Directory
+  def createDirectory(xs: Array[String]): Directory
 
-  def getFile(xs: Array[String]): File
+  def createFile(xs: Array[String]): File
 
-  def getSymLink(xs: Array[String]): SymLink
+  def createSymLink(xs: Array[String]): SymLink
 
-  /** The path semilattice / partial order of this file system. */
-  implicit object PathStructure extends EqUpperSemilattice[Path] with HasTop[Path] { //TODO: BoundedUpperSemilatticeWithEq?
-  def top = root
-    def sup(x: Path, y: Path) = {
-      val lx = x.path.length
-      val ly = x.path.length
-      val l = Util.lcpLength(x.path, y.path)
-
-      if (l == lx) x
-      else if (l == ly) y
-      else getDirectory(x.path.take(l))
-    }
-    override def eq(x: Path, y: Path) = x == y
-    def le(x: Path, y: Path) = y.path startsWith x.path
-  }
-
-  implicit object PathHashing extends Hashing[Path] {
-    def hash(x: Path) = x.##
-    def eq(x: Path, y: Path) = x == y
-  }
 }

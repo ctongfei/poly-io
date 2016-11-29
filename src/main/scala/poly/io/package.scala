@@ -8,6 +8,10 @@ package object io {
 
   type OutputStream = java.io.OutputStream
 
+  type Reader = java.io.Reader
+
+  type Writer = java.io.Writer
+
   type PosixFilePermission = java.nio.file.attribute.PosixFilePermission
 
   object PosixFilePermission {

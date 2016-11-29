@@ -46,24 +46,15 @@ trait ReadOnlyPath[S <: ReadOnlyFileSystem] { self: S#Path =>
   // PATH MANIPULATION
 
   /** Returns the parent directory of this path. */
-  def parent: fileSystem.Directory = fileSystem.getDirectory(path.init)
+  def parent: fileSystem.Directory = fileSystem.createDirectory(path.init)
 
   def relativize(that: fileSystem.Directory) = new RelativeDirectory(Util.relativize(self.path, that.path))
   def relativize(that: fileSystem.File) = new RelativeFile(Util.relativize(self.path, that.path))
   def relativize(that: fileSystem.Path) = new RelativePath(Util.relativize(self.path, that.path))
 
-  def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.getDirectory(Util.resolve(self.path, rd.path))
-  def resolve(rf: RelativeFile): fileSystem.File = fileSystem.getFile(Util.resolve(self.path, rf.path))
-  def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.getSymLink(Util.resolve(self.path, rl.path))
-
-  /** Returns the lowest common ancestor of two paths in the same file system.
-   * @example {{{
-   *    Directory("/home/a") lca Directory("/home/b") == Directory("/home")
-   * }}}
-   */
-  def lca(that: fileSystem.Path) =
-    fileSystem.PathStructure.sup(self.asInstanceOf[fileSystem.Path], that)
-  // the typecast is actually safe: self is actually an instance of fileSystem.Path
+  def resolve(rd: RelativeDirectory): fileSystem.Directory = fileSystem.createDirectory(Util.resolve(self.path, rd.path))
+  def resolve(rf: RelativeFile): fileSystem.File = fileSystem.createFile(Util.resolve(self.path, rf.path))
+  def resolve(rl: RelativeSymLink): fileSystem.SymLink = fileSystem.createSymLink(Util.resolve(self.path, rl.path))
 
   def /(rd: RelativeDirectory): fileSystem.Directory = resolve(rd)
   def /(rf: RelativeFile): fileSystem.File = resolve(rf)
@@ -80,6 +71,7 @@ trait ReadOnlyPath[S <: ReadOnlyFileSystem] { self: S#Path =>
   def isFile: Boolean
   def isSymLink: Boolean
 
+
   // COPYING
   def copyTo[DS <: FileSystem](destination: DS#Directory)(implicit ft: Copying[S, DS]) = ft.copyTo(self, destination)
 
@@ -88,8 +80,8 @@ trait ReadOnlyPath[S <: ReadOnlyFileSystem] { self: S#Path =>
   override def hashCode = fullName.hashCode
 
   override def equals(that: Any) = that match {
-    case that: fileSystem.Path if that.fileSystem eq this.fileSystem
-      => (this.fileSystem eq that.fileSystem) && this.fullName == that.fullName
+    case that: fileSystem.Path if that.fileSystem eq this.fileSystem //
+      => this.fullName == that.fullName
     case _ => false
   }
 

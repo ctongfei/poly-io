@@ -1,14 +1,10 @@
 name := "poly-io"
-version := "0.3.0"
+version := "0.3.1"
 isSnapshot := false
 scalaVersion := "2.11.8"
 organization := "me.tongfei"
 
 crossScalaVersions := Seq("2.11.8", "2.12.0")
-
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-libraryDependencies += "me.tongfei" %% "poly-algebra" % "0.4.0-SNAPSHOT"
 
 publishMavenStyle := true
 

@@ -1,7 +1,5 @@
 package poly.io
 
-import poly.algebra._
-
 /**
  * Represents a writable file system.
  *

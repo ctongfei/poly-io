@@ -4,7 +4,6 @@ import java.io._
 import scala.collection._
 import scala.collection.JavaConversions._
 import scala.language.implicitConversions
-
 import poly.io._
 
 /**
@@ -12,7 +11,7 @@ import poly.io._
  */
 object FromJava {
 
-  private[io] implicit class javaStreamAsScalaIterable[T](val juss: java.util.stream.Stream[T]) extends AnyVal {
+  implicit class javaStreamAsScalaIterable[T](val juss: java.util.stream.Stream[T]) extends AnyVal {
     def asIterable: Iterable[T] = new AbstractIterable[T] {
       def iterator = juss.iterator()
     }
@@ -26,7 +25,8 @@ object FromJava {
     Local.j2pp(jnfp)
   }
 
-  implicit def javaCharsetAsPoly(jcs: java.nio.charset.Charset): Encoding = new Encoding(jcs)
+
+  implicit def javaCharsetAsPoly(jcs: java.nio.charset.Charset): Codec = Codec(jcs)
 
   def javaInputStreamAsScalaByteIterator(jii: java.io.InputStream): Iterator[Byte] = new Iterator[Byte] {
     private[this] var nextByte: Int = -1
@@ -73,7 +73,7 @@ object FromJava {
 
   def javaReaderAsScalaLineIterator(jir: java.io.Reader): Iterator[String] = new Iterator[String] {
     private[this] val reader = new BufferedReader(jir)
-    private[this] var nextLine: String = null
+    private[this] var nextLine: String = _
     def hasNext = {
       if (nextLine != null) true
       else {
@@ -92,7 +92,6 @@ object FromJava {
       else throw new NoSuchElementException
     }
   }
-
 
 
 }

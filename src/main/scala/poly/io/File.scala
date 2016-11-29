@@ -11,7 +11,7 @@ trait File[S <: FileSystem] extends ReadOnlyFile[S] with Path[S] { self: S#File 
   def outputStream: OutputStream
 
   /** Opens a writer to write characters to this file given a character encoding. */
-  def writer(implicit enc: Encoding): java.io.Writer =
+  def writer(implicit enc: Codec): java.io.Writer =
     new java.io.BufferedWriter(new java.io.OutputStreamWriter(outputStream, enc.charset))
 
 }

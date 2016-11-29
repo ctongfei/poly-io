@@ -10,18 +10,17 @@ import scala.collection.JavaConversions._
  * @author Tongfei Chen
  * @since 0.3.0
  */
-class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFileSystem { zip =>
+class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSystem { zip =>
 
   def prefix = s"$zf!${zf.fileSystem.separator}"
   def separator = zf.fileSystem.separator
 
-  /** Returns the root directory of this file system. */
   val root = new Directory(Array())
 
   private[this] val jzf = new ZipFile(zf.toString, enc.charset)
 
-  private[this] def createDirectory(path: Array[String]): zip.Directory = {
-    var dir: zip.Directory = root
+  private[this] def createDir0(path: Array[String]): Directory = {
+    var dir: Directory = root
     for (p <- path) {
       if (!(dir.ch contains p))
         dir.ch += p -> new Directory(dir.path :+ p)
@@ -30,16 +29,16 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
     dir
   }
 
-  private[this] def createFile(path: Array[String], ze: ZipEntry): Unit = {
-    val dir = createDirectory(path.init)
+  private[this] def createFile0(path: Array[String], ze: ZipEntry): Unit = {
+    val dir = createDir0(path.init)
     dir.ch += path.last -> new File(path, ze)
   }
 
   // Constructor: construct the tree structure inside this zip archive
   for (ze <- jzf.stream.iterator) {
     val name = ze.getName
-    if (name endsWith "/") createDirectory(name.split('/').filter(_ != ""))
-    else createFile(name.split('/'), ze)
+    if (name endsWith "/") createDir0(name.split('/').filter(_ != ""))
+    else createFile0(name.split('/'), ze)
   }
 
   sealed abstract class Path extends poly.io.ReadOnlyPath[zip.type] {
@@ -69,23 +68,30 @@ class ZipArchive private[io](zf: Local.File, enc: Encoding) extends ReadOnlyFile
 
   type SymLink = Nothing
 
-  def getPath(xs: Array[String]): Path = {
-    val parent = getDirectory(xs.init)
+  def createPath(xs: Array[String]): Path = {
+    val parent = createDirectory(xs.init)
     parent.ch(xs.last)
   }
 
-  def getDirectory(xs: Array[String]): Directory = {
+  def createDirectory(xs: Array[String]): Directory = {
     var c = zip.root
     for (x <- xs) c = c.ch(x).asInstanceOf[Directory]
     c
   }
 
-  def getFile(xs: Array[String]): File = getPath(xs).asInstanceOf[File]
+  def createFile(xs: Array[String]): File = createPath(xs).asInstanceOf[File]
 
-  def getSymLink(xs: Array[String]) = throw new UnsupportedOperationException("Zip files do not support symbolic links.")
+  def createSymLink(xs: Array[String]) = throw new UnsupportedOperationException("Zip files do not support symbolic links.")
 }
 
 object ZipArchive {
-  def apply(f: Local.File)(implicit enc: Encoding) = new ZipArchive(f, enc)
-  def apply(s: String)(implicit enc: Encoding) = new ZipArchive(Local.File(s), enc)
+
+  /**
+   * Opens a zip archive from a local file as a new file system.
+   * @param enc Encoding of the filenames in the zip archive
+   */
+  def apply(f: Local.File)(implicit enc: Codec) = new ZipArchive(f, enc)
+
+
+  def apply(s: String)(implicit enc: Codec) = new ZipArchive(Local.File(s), enc)
 }

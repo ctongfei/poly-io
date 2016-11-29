@@ -44,6 +44,7 @@ private[poly] object Util {
   }
 
   /**
+   * A lazy depth-first tree searcher.
    * @author Tongfei Chen
    * TODO: To be replaced with [[poly.collection.search.DepthFirstTreeSearcher]].
    */

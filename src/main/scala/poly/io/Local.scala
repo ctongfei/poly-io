@@ -16,7 +16,7 @@ object Local extends FileSystem {
 
   sealed abstract class Path extends poly.io.Path[Local.type] {
     val fileSystem = Local
-    lazy val jp: JPath = JPaths.get(toString)
+    private[io] lazy val jp: JPath = JPaths.get(toString)
     // PERMISSIONS
     def permissions = JFiles.getPosixFilePermissions(jp)
     def isHidden = JFiles.isHidden(jp)
@@ -72,11 +72,13 @@ object Local extends FileSystem {
       else j2pd(JPaths.get(s))
     }
     /** Returns the root of the local filesystem. */
-    lazy val root = Directory(prefix)
+    def root = Directory(prefix)
     /** Returns the home folder of the current user of the local filesystem. */
-    lazy val home = Directory(System.getProperty("user.home"))
+    def home = Directory(System.getProperty("user.home"))
     /** Returns the current working directory. */
-    lazy val cwd = Directory(System.getProperty("user.dir"))
+    def cwd = Directory(System.getProperty("user.dir"))
+    /** Returns the directory for temporary files under the current OS. */
+    def tmp = Directory(System.getProperty("java.io.tmpdir"))
   }
 
   class SymLink private[io](val path: Array[String]) extends Path with poly.io.ReadOnlySymLink[Local.type] {
@@ -108,10 +110,10 @@ object Local extends FileSystem {
 
   def root = Directory.root
 
-  def getPath(xs: Array[String]) = j2pp(JPaths.get(prefix + xs.mkString(separator)))
-  def getDirectory(xs: Array[String]) = new Directory(xs)
-  def getFile(xs: Array[String]) = new File(xs)
-  def getSymLink(xs: Array[String]) = new SymLink(xs)
+  def createPath(xs: Array[String]) = j2pp(JPaths.get(prefix + xs.mkString(separator)))
+  def createDirectory(xs: Array[String]) = new Directory(xs)
+  def createFile(xs: Array[String]) = new File(xs)
+  def createSymLink(xs: Array[String]) = new SymLink(xs)
 
   implicit object copying extends Copying[Local.type, Local.type] {
     def copyTo(f: Local.Path, d: Local.Directory): Unit = f match {
