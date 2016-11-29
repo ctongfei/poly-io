@@ -46,7 +46,11 @@ object Local extends FileSystem {
   }
 
   object File {
-    def apply(s: String) = j2pf(JPaths.get(s))
+    def apply(s: String) = {
+      if (s startsWith "~")
+        j2pf(JPaths.get(Directory.home.fullName + s.substring(1)))
+      else j2pf(JPaths.get(s))
+    }
   }
 
   class Directory private[io](val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
@@ -67,7 +71,7 @@ object Local extends FileSystem {
 
   object Directory {
     def apply(s: String): Local.Directory = {
-      if (s.startsWith("~"))
+      if (s startsWith "~")
         j2pd(JPaths.get(home.fullName + s.substring(1)))
       else j2pd(JPaths.get(s))
     }
