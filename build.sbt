@@ -1,5 +1,5 @@
 name := "poly-io"
-version := "0.3.1"
+version := "0.3.2"
 isSnapshot := false
 scalaVersion := "2.11.8"
 organization := "me.tongfei"

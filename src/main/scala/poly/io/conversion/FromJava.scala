@@ -5,6 +5,7 @@ import scala.collection._
 import scala.collection.JavaConversions._
 import scala.language.implicitConversions
 import poly.io._
+import poly.io.conversion.ImplicitlyFromJava._
 
 /**
  * @author Tongfei Chen
@@ -17,81 +18,16 @@ object FromJava {
     }
   }
 
-  implicit def javaFileAsPoly(jif: java.io.File): Local.Path = {
-    Local.j2pp(java.nio.file.Paths.get(jif.getAbsolutePath))
+  implicit class JavaFileAsPolyOps(val jif: java.io.File) extends AnyVal {
+    def asPolyPath = javaFileAsPoly(jif)
   }
 
-  implicit def javaPathAsPoly(jnfp: java.nio.file.Path): Local.Path = {
-    Local.j2pp(jnfp)
+  implicit class JavaPathAsPolyOps(val jnfp: java.nio.file.Path) extends AnyVal {
+    def asPolyPath = javaPathAsPoly(jnfp)
   }
 
-
-  implicit def javaCharsetAsPoly(jcs: java.nio.charset.Charset): Codec = Codec(jcs)
-
-  def javaInputStreamAsScalaByteIterator(jii: java.io.InputStream): Iterator[Byte] = new Iterator[Byte] {
-    private[this] var nextByte: Int = -1
-    def hasNext = {
-      if (nextByte != -1) true
-      else {
-        nextByte = jii.read()
-        val hasNext = nextByte != -1
-        if (!hasNext) jii.close()
-        hasNext
-      }
-    }
-    def next() = {
-      if ((nextByte != -1) || hasNext) {
-        val byte = nextByte
-        nextByte = -1
-        byte.toByte
-      }
-      else throw new NoSuchElementException
-    }
+  implicit class JavaCharsetAsPolyOps(val jcs: java.nio.charset.Charset) extends AnyVal {
+    def asPolyCodec = javaCharsetAsPoly(jcs)
   }
-
-  def javaReaderAsScalaCharIterator(jir: java.io.Reader): Iterator[Char] = new Iterator[Char] {
-    private[this] val reader = new BufferedReader(jir)
-    private[this] var nextChar: Int = -1
-    def hasNext = {
-      if (nextChar != -1) true
-      else {
-        nextChar = reader.read()
-        val hasNext = nextChar != -1
-        if (!hasNext) reader.close()
-        hasNext
-      }
-    }
-    def next() = {
-      if ((nextChar != -1) || hasNext) {
-        val char = nextChar
-        nextChar = -1
-        char.toChar
-      }
-      else throw new NoSuchElementException
-    }
-  }
-
-  def javaReaderAsScalaLineIterator(jir: java.io.Reader): Iterator[String] = new Iterator[String] {
-    private[this] val reader = new BufferedReader(jir)
-    private[this] var nextLine: String = _
-    def hasNext = {
-      if (nextLine != null) true
-      else {
-        nextLine = reader.readLine()
-        val hasNext = nextLine != null
-        if (!hasNext) reader.close()
-        hasNext
-      }
-    }
-    def next() = {
-      if ((nextLine != null) || hasNext) {
-        val line = nextLine
-        nextLine = null
-        line
-      }
-      else throw new NoSuchElementException
-    }
-  }
-
 
 }

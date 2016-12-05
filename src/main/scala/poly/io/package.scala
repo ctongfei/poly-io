@@ -1,6 +1,6 @@
 package poly
 
-package object io {
+package object io extends ByteStreamOps with CharStreamOps {
 
   type Closeable = java.io.Closeable
 

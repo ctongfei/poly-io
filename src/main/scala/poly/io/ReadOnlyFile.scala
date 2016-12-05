@@ -20,17 +20,17 @@ trait ReadOnlyFile[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self: S#Fi
 
   /** Returns a lazy iterable sequence of raw bytes in this file. */
   def bytes: Iterable[Byte] = new Iterable[Byte] {
-    def iterator = FromJava.javaInputStreamAsScalaByteIterator(inputStream)
+    def iterator = inputStream
   }
 
   /** Returns a lazy iterable sequence of characters in this file given a character encoding. */
   def chars(implicit enc: Codec): Iterable[Char] = new Iterable[Char] {
-    def iterator = FromJava.javaReaderAsScalaCharIterator(reader(enc))
+    def iterator = reader(enc)
   }
 
   /** Returns a lazy iterable sequence of lines in this file given a character encoding. */
   def lines(implicit enc: Codec): Iterable[String] = new Iterable[String] {
-    def iterator = FromJava.javaReaderAsScalaLineIterator(reader(enc))
+    def iterator = reader(enc).linesIterator
   }
 
   /** Reads all content of this file to a string. */
