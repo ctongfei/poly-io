@@ -1,16 +1,13 @@
 package poly.io
 
 import java.io._
-
-import poly.io.conversion.FromJava._
-
-import scala.collection.Iterator
+import scala.collection._
 
 /**
  * @author Tongfei Chen
  * @since 0.3.2
  */
-trait CharStreamOps {
+trait ReaderWriterOps {
 
   implicit class ReaderOps(val reader: Reader) extends Iterator[Char] {
 

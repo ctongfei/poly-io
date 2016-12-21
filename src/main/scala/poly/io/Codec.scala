@@ -27,11 +27,8 @@ object Codec {
   implicit object UTF8 extends Codec(StandardCharsets.UTF_8)
 
   object UTF16 extends Codec(StandardCharsets.UTF_16)
-
   object ASCII extends Codec(StandardCharsets.US_ASCII)
-
   object Default extends Codec(Charset.defaultCharset())
-
   object ISOLatin1 extends Codec(StandardCharsets.ISO_8859_1)
 
 }

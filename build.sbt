@@ -1,10 +1,10 @@
 name := "poly-io"
-version := "0.3.2"
+version := "0.3.3"
 isSnapshot := false
 scalaVersion := "2.11.8"
 organization := "me.tongfei"
 
-crossScalaVersions := Seq("2.11.8", "2.12.0")
+crossScalaVersions := Seq("2.11.8", "2.12.1")
 
 publishMavenStyle := true
 

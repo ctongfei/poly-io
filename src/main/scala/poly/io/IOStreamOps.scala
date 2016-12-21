@@ -2,11 +2,13 @@ package poly.io
 
 import java.util.zip._
 
+import poly.io.compression._
+
 /**
  * @author Tongfei Chen
  * @since 0.3.2
  */
-trait ByteStreamOps {
+trait IOStreamOps {
 
   implicit class InputStreamOps(val is: InputStream) extends Iterator[Byte] {
 
@@ -32,9 +34,9 @@ trait ByteStreamOps {
     }
 
     /**
-     * Decompresses this input stream using GZip.
+     * Decompresses this input stream using a decompressor.
      */
-    def decompressGz = new GZIPInputStream(is)
+    def decompress(d: Decompressor) = d decompress is
 
     /**
      * Decodes this input stream using a specific codec.
@@ -46,9 +48,9 @@ trait ByteStreamOps {
   implicit class OutputStreamOps(val os: OutputStream) {
 
     /**
-     * Compresses this output stream using GZip.
+     * Compresses this output stream using a compressor.
      */
-    def compressGz = new GZIPOutputStream(os)
+    def compress(c: Compressor) = c compress os
 
     /**
      * Encodes this output stream using a specific codec.
@@ -58,4 +60,3 @@ trait ByteStreamOps {
   }
 
 }
-
