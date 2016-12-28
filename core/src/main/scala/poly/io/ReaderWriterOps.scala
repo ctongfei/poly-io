@@ -32,7 +32,7 @@ trait ReaderWriterOps {
       else throw new NoSuchElementException
     }
 
-    def linesIterator: Iterator[String] =  new Iterator[String] {
+    def linesIterator: Iterator[String] = new Iterator[String] {
       private[this] val br = new BufferedReader(reader)
       private[this] var nextLine: String = _
       def hasNext = {
@@ -54,7 +54,19 @@ trait ReaderWriterOps {
       }
     }
 
+  }
 
+  implicit class WriterOps(val writer: Writer) extends mutable.Builder[Char, Unit] {
+    def +=(elem: Char) = { writer.write(elem); this }
+    def clear() = throw new Exception("Writers cannot be cleared.")
+    def result() = writer.close()
+
+    def linesBuilder: mutable.Builder[String, Unit] = new mutable.Builder[String, Unit] {
+      private[this] val bw = new BufferedWriter(writer)
+      def +=(elem: String) = { writer.write(elem + System.lineSeparator()); this }
+      def clear() = throw new Exception("Writers cannot be cleared.")
+      def result() = writer.close()
+    }
   }
 
 }

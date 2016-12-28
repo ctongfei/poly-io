@@ -10,4 +10,8 @@ import poly.io._
 object Gzip extends Compressor with Decompressor {
   def compress(os: OutputStream) = new GZIPOutputStream(os)
   def decompress(is: InputStream) = new GZIPInputStream(is)
+
+  def withBufferSize(bufferSize: Int) = new Compressor {
+    def compress(os: OutputStream) = new GZIPOutputStream(os, bufferSize)
+  }
 }
