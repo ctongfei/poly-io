@@ -16,7 +16,7 @@
 import poly.io.Local._
 
 val lines = File("/usr/local/...").lines // type: Iterable[String]
-val li = File("/home/foo/bar.gz") decompress GZip decode Codec.ISOLatin1 linesIterator // type: Iterator[String]
+val li = File("/home/foo/bar.gz") decompress Gzip decode Codec.ISOLatin1 linesIterator // type: Iterator[String]
 ```
 
 ##### Typesafe (dependent-type based) filesystem manipulation

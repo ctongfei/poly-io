@@ -7,7 +7,7 @@ import poly.io._
  * @author Tongfei Chen
  * @since 0.3.3
  */
-object GZip extends Compressor with Decompressor {
+object Gzip extends Compressor with Decompressor {
   def compress(os: OutputStream) = new GZIPOutputStream(os)
   def decompress(is: InputStream) = new GZIPInputStream(is)
 }
