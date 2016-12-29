@@ -92,6 +92,5 @@ object ZipArchive {
    */
   def apply(f: Local.File)(implicit enc: Codec) = new ZipArchive(f, enc)
 
-
   def apply(s: String)(implicit enc: Codec) = new ZipArchive(Local.File(s), enc)
 }

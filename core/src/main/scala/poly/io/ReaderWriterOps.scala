@@ -9,15 +9,22 @@ import scala.collection._
  */
 trait ReaderWriterOps {
 
-  implicit class ReaderOps(val reader: Reader) extends StreamAsIterator[Char, Int](-1) {
+  implicit class ReaderOps(val reader: Reader) {
 
-    def convert(b: Int) = b.toChar
-    def read() = reader.read()
-    def close() = reader.close()
+    def asIterator: Iterator[Char] = new StreamAsIterator[Char, Int](-1) {
+      def convert(b: Int) = b.toChar
+      def read() = reader.read()
+    }
 
-    def linesIterator: StreamAsIterator[String, String] = {
+    def asCloseableIterator: CloseableIterator[Char] = new StreamAsCloseableIterator[Char, Int](-1) {
+      def convert(b: Int) = b.toChar
+      def read() = reader.read()
+      def close() = reader.close()
+    }
+
+    def linesIterator: CloseableIterator[String] = {
       val br = new BufferedReader(reader)
-      new StreamAsIterator[String, String](null) {
+      new StreamAsCloseableIterator[String, String](null) {
         def convert(b: String) = b
         def read() = br.readLine()
         def close() = br.close()

@@ -33,8 +33,8 @@ trait ReadOnlyFileSystem extends TapeFileSystem { self =>
 
   def createSymLink(xs: Array[String]): SymLink
 
-  def paths = root.recursiveChildren
+  def paths: Iterable[Path] = root.recursiveChildren
 
-  def files = root.recursiveFiles
+  def files: Iterable[File] = root.recursiveFiles
 
 }

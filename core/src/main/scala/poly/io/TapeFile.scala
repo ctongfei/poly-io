@@ -17,17 +17,17 @@ trait TapeFile[S <: TapeFileSystem] { self: S#File =>
     new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, enc.charset))
 
   /** Returns a lazy iterable sequence of raw bytes in this file. */
-  def bytes: Iterable[Byte] = new Iterable[Byte] {
-    def iterator = inputStream
+  def bytes: AutoCloseableIterable[Byte] = new AutoCloseableIterable[Byte] {
+    def iterator = inputStream.asCloseableIterator
   }
 
   /** Returns a lazy iterable sequence of characters in this file given a character encoding. */
-  def chars(implicit enc: Codec): Iterable[Char] = new Iterable[Char] {
-    def iterator = reader(enc)
+  def chars(implicit enc: Codec): AutoCloseableIterable[Char] = new AutoCloseableIterable[Char] {
+    def iterator = reader(enc).asCloseableIterator
   }
 
   /** Returns a lazy iterable sequence of lines in this file given a character encoding. */
-  def lines(implicit enc: Codec): Iterable[String] = new Iterable[String] {
+  def lines(implicit enc: Codec): AutoCloseableIterable[String] = new AutoCloseableIterable[String] {
     def iterator = reader(enc).linesIterator
   }
 

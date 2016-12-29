@@ -2,7 +2,6 @@ package poly.io.archive
 
 import poly.io._
 import org.apache.commons.compress.archivers.tar._
-import org.apache.commons.compress.utils._
 
 class TarArchive private(inputStream: => InputStream) extends TapeFileSystem { tar =>
   def prefix = "/"
@@ -20,14 +19,17 @@ class TarArchive private(inputStream: => InputStream) extends TapeFileSystem { t
 
   class File private[io](te: TarArchiveEntry, is: InputStream) extends Path(te) with TapeFile[this.type] {
     def size = te.getSize
-    def inputStream = is
+    def inputStream = new java.io.InputStream { // suppress the closing of the input stream!
+      def read() = is.read()
+      override def read(b: Array[Byte], off: Int, len: Int) = is.read(b, off, len)
+    }
   }
 
   class Directory private[io](te: TarArchiveEntry) extends Path(te) with TapeDirectory[this.type]
 
   class SymLink private[io](te: TarArchiveEntry) extends Path(te) with TapeSymLink[this.type]
 
-  def paths: Iterable[Path] = new Iterable[Path] {
+  def paths: AutoCloseableIterable[Path] = new AutoCloseableIterable[Path] {
     private[this] val ti = new TarIterator(inputStream)
     def iterator = ti.map {
       case te if te.isDirectory => new Directory(te)
@@ -36,8 +38,7 @@ class TarArchive private(inputStream: => InputStream) extends TapeFileSystem { t
     }
   }
 
-
-  def files: Iterable[File] = new Iterable[File] {
+  def files: AutoCloseableIterable[File] = new AutoCloseableIterable[File] {
     private[this] val ti = new TarIterator(inputStream)
     def iterator = ti.collect {
       case te if te.isFile => new File(te, ti.tarStream)
@@ -50,12 +51,15 @@ object TarArchive {
   /** Constructs a TAR archive from any readable file. */
   def apply(tar: TapeFile[_]) = new TarArchive(tar.inputStream)
 
+  /** Constructs a TAR archive from a local file path string. */
+  def apply(tarFilename: String) = new TarArchive(Local.File(tarFilename).inputStream)
+
   /** Constructs a TAR archive from an input stream. */
   def apply(inputStream: => InputStream) = new TarArchive(inputStream)
 
 }
 
-private[io] class TarIterator(tarInputStream: InputStream) extends StreamAsIterator[TarArchiveEntry, TarArchiveEntry](null) {
+private[io] class TarIterator(tarInputStream: InputStream) extends StreamAsCloseableIterator[TarArchiveEntry, TarArchiveEntry](null) {
   private[io] val tarStream = new TarArchiveInputStream(tarInputStream)
   def convert(b: TarArchiveEntry) = b
   def read() = tarStream.getNextTarEntry
