@@ -9,12 +9,12 @@ import scala.collection.JavaConversions._
  * @author Tongfei Chen
  * @since 0.2.0
  */
-object Local extends FileSystem {
+object Local extends WritableFileSystem {
 
   val prefix = if (System.getProperty("os.name").startsWith("Windows")) "" else "/"
   val separator = if (System.getProperty("os.name").startsWith("Windows")) "\\" else "/"
 
-  sealed abstract class Path extends poly.io.Path[Local.type] {
+  sealed abstract class Path extends WritablePath[Local.type] {
     val fileSystem = Local
     private[io] lazy val jp: JPath = JPaths.get(toString)
     // PERMISSIONS
@@ -39,7 +39,7 @@ object Local extends FileSystem {
     def apply(s: String) = j2pp(JPaths.get(s))
   }
 
-  class File private[io](val path: Array[String]) extends Path with poly.io.File[Local.type] {
+  class File private[io](val path: Array[String]) extends Path with WritableFile[Local.type] {
     def size = JFiles.size(jp)
     def inputStream = JFiles.newInputStream(jp)
     def outputStream = JFiles.newOutputStream(jp)
@@ -53,7 +53,7 @@ object Local extends FileSystem {
     }
   }
 
-  class Directory private[io](val path: Array[String]) extends Path with poly.io.Directory[Local.type] {
+  class Directory private[io](val path: Array[String]) extends Path with WritableDirectory[Local.type] {
     def children = JFiles.list(jp).asIterable.map(j2pp)
     override def recursiveChildren = JFiles.walk(jp).asIterable.map(j2pd)
     def subdirectories = JFiles.list(jp).asIterable.filter(f => JFiles.isDirectory(f)).map(j2pd)
@@ -85,7 +85,7 @@ object Local extends FileSystem {
     def tmp = Directory(System.getProperty("java.io.tmpdir"))
   }
 
-  class SymLink private[io](val path: Array[String]) extends Path with poly.io.ReadOnlySymLink[Local.type] {
+  class SymLink private[io](val path: Array[String]) extends Path with ReadOnlySymLink[Local.type] {
     def target = j2pd(JFiles.readSymbolicLink(jp))
   }
 

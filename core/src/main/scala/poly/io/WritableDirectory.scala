@@ -5,7 +5,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.2.0
  */
-trait Directory[S <: FileSystem] extends ReadOnlyDirectory[S] with Path[S] { self: S#Directory =>
+trait WritableDirectory[S <: WritableFileSystem] extends ReadOnlyDirectory[S] with WritablePath[S] { self: S#Directory =>
 
   def clear(): Unit = for (c <- children) c.delete()
 

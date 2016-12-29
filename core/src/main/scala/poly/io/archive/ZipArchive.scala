@@ -9,7 +9,7 @@ import scala.collection.JavaConversions._
  * Represents the file system inside a Zip archive.
  * @author Tongfei Chen
  * @since 0.3.0
- */
+ */ //TODO: relax Local.File constraint
 class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSystem { zip =>
 
   def prefix = s"$zf!${zf.fileSystem.separator}"
@@ -41,7 +41,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
     else createFile0(name.split('/'), ze)
   }
 
-  sealed abstract class Path extends poly.io.ReadOnlyPath[zip.type] {
+  sealed abstract class Path extends ReadOnlyPath[zip.type] {
     val fileSystem: zip.type = zip
     def permissions = throw new UnsupportedOperationException("Zip archives does not support POSIX permissions")
     def isHidden = permissions
@@ -50,7 +50,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
     def isExecutable = permissions
   }
 
-  class Directory private[io](val path: Array[String]) extends Path with poly.io.ReadOnlyDirectory[zip.type] {
+  class Directory private[io](val path: Array[String]) extends Path with ReadOnlyDirectory[zip.type] {
     private[io] val ch = mutable.HashMap[String, Path]()
     def children: Iterable[Path] = ch.values
     def subdirectories: Iterable[Directory] = ch.values.collect { case d: Directory => d }
@@ -61,7 +61,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
     def contains(name: String): Boolean = ch contains name
   }
 
-  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with poly.io.ReadOnlyFile[zip.type] {
+  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with ReadOnlyFile[zip.type] {
     def size = ze.getSize
     def inputStream = jzf.getInputStream(ze)
   }

@@ -46,7 +46,6 @@ private[poly] object Util {
   /**
    * A lazy depth-first tree searcher.
    * @author Tongfei Chen
-   * TODO: To be replaced with [[poly.collection.search.DepthFirstTreeSearcher]].
    */
   class DepthFirstTreeSearcher[A](s0: A)(t: A => Traversable[A]) extends Iterator[A] {
 

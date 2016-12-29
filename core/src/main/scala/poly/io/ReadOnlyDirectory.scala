@@ -9,7 +9,7 @@ import scala.collection.{Map, DefaultMap}
  * @author Tongfei Chen
  * @since 0.3.0
  */
-trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self: S#Directory =>
+trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] with TapeDirectory[S] { self: S#Directory =>
 
   /** Returns an iterable sequence of all the immediate children of this directory. */
   def children: Iterable[fileSystem.Path]
@@ -50,10 +50,4 @@ trait ReadOnlyDirectory[S <: ReadOnlyFileSystem] extends ReadOnlyPath[S] { self:
   def /@(s: String): fileSystem.SymLink
 
   def contains(name: String): Boolean
-
-
-  final def isDirectory: Boolean = true
-  final def isFile: Boolean = false
-  final def isSymLink: Boolean = false
-
 }

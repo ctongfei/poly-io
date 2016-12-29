@@ -5,7 +5,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.2.0
  */
-trait File[S <: FileSystem] extends ReadOnlyFile[S] with Path[S] { self: S#File =>
+trait WritableFile[S <: WritableFileSystem] extends ReadOnlyFile[S] with WritablePath[S] { self: S#File =>
 
   /** Opens an output stream to write raw bytes to this file. */
   def outputStream: OutputStream

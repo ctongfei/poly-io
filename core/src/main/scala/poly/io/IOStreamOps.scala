@@ -12,28 +12,11 @@ import scala.collection.mutable
  */
 trait IOStreamOps {
 
-  implicit class InputStreamOps(val is: InputStream) extends Iterator[Byte] {
+  implicit class InputStreamOps(val is: InputStream) extends StreamAsIterator[Byte, Int](-1) {
 
-    private[this] var nextByte: Int = -1
-
-    def hasNext = {
-      if (nextByte != -1) true
-      else {
-        nextByte = is.read()
-        val hasNext = nextByte != -1
-        if (!hasNext) is.close()
-        hasNext
-      }
-    }
-
-    def next() = {
-      if ((nextByte != -1) || hasNext) {
-        val byte = nextByte
-        nextByte = -1
-        byte.toByte
-      }
-      else throw new NoSuchElementException
-    }
+    def convert(b: Int) = b.toByte
+    def read() = is.read()
+    def close() = is.close()
 
     /** Decompresses this input stream using a decompressor. */
     def decompress(d: Decompressor) = d decompress is

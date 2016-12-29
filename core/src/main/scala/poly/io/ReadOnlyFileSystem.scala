@@ -8,19 +8,19 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.3.0
  */
-trait ReadOnlyFileSystem { self =>
+trait ReadOnlyFileSystem extends TapeFileSystem { self =>
 
   def prefix: String
 
   def separator: String
 
-  type Path <: poly.io.ReadOnlyPath[this.type]
+  type Path <: ReadOnlyPath[this.type]
 
-  type Directory <: Path with poly.io.ReadOnlyDirectory[this.type]
+  type Directory <: Path with ReadOnlyDirectory[this.type]
 
-  type File <: Path with poly.io.ReadOnlyFile[this.type]
+  type File <: Path with ReadOnlyFile[this.type]
 
-  type SymLink <: Path with poly.io.ReadOnlySymLink[this.type]
+  type SymLink <: Path with ReadOnlySymLink[this.type]
 
   /** Returns the root directory of this file system. */
   def root: Directory
@@ -32,5 +32,9 @@ trait ReadOnlyFileSystem { self =>
   def createFile(xs: Array[String]): File
 
   def createSymLink(xs: Array[String]): SymLink
+
+  def paths = root.recursiveChildren
+
+  def files = root.recursiveFiles
 
 }
