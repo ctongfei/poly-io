@@ -15,7 +15,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
   def prefix = s"$zf!${zf.fileSystem.separator}"
   def separator = zf.fileSystem.separator
 
-  val root = new Directory(Array())
+  val root: Directory = new Directory(Array(), null)
 
   private[this] val jzf = new ZipFile(zf.toString, enc.charset)
 
@@ -23,7 +23,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
     var dir: Directory = root
     for (p <- path) {
       if (!(dir.ch contains p))
-        dir.ch += p -> new Directory(dir.path :+ p)
+        dir.ch += p -> new Directory(dir.path :+ p, null)
       dir = dir.ch(p).asInstanceOf[Directory]
     }
     dir
@@ -36,21 +36,30 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
 
   // Constructor: construct the tree structure inside this zip archive
   for (ze <- jzf.stream.iterator) {
+    println(ze.getName)
     val name = ze.getName
-    if (name endsWith "/") createDir0(name.split('/').filter(_ != ""))
+    if (name == "/" && root.ze == null) root.ze = ze
+    else if (name endsWith "/") createDir0(name.split('/').filter(_ != "")).ze = ze
     else createFile0(name.split('/'), ze)
   }
 
-  sealed abstract class Path extends ReadOnlyPath[zip.type] {
+  sealed abstract class Path(var ze: ZipEntry) extends ReadOnlyPath[zip.type] {
     val fileSystem: zip.type = zip
     def permissions = throw new UnsupportedOperationException("Zip archives does not support POSIX permissions")
     def isHidden = permissions
     def isReadable = true
     def isWriteable = false
     def isExecutable = permissions
+    def creationTime = ze.getCreationTime.toInstant
+    def modifiedTime = ze.getLastModifiedTime.toInstant
+
+    def comment = ze.getComment
+    /** Returns the CRC-32 checksum of the uncompressed data. */
+    def crc = ze.getCrc
+
   }
 
-  class Directory private[io](val path: Array[String]) extends Path with ReadOnlyDirectory[zip.type] {
+  class Directory private[io](val path: Array[String], ze: ZipEntry) extends Path(ze) with ReadOnlyDirectory[zip.type] {
     private[io] val ch = mutable.HashMap[String, Path]()
     def children: Iterable[Path] = ch.values
     def subdirectories: Iterable[Directory] = ch.values.collect { case d: Directory => d }
@@ -61,7 +70,7 @@ class ZipArchive private[io](zf: Local.File, enc: Codec) extends ReadOnlyFileSys
     def contains(name: String): Boolean = ch contains name
   }
 
-  class File private[io](val path: Array[String], val ze: ZipEntry) extends Path with ReadOnlyFile[zip.type] {
+  class File private[io](val path: Array[String], ze: ZipEntry) extends Path(ze) with ReadOnlyFile[zip.type] {
     def size = ze.getSize
     def inputStream = jzf.getInputStream(ze)
   }

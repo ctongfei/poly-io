@@ -1,7 +1,10 @@
 package poly.io
 
+import java.time._
+
 /**
  * Represents a path in a tape file system.
+ *
  * @author Tongfei Chen
  * @since 0.4.0
  */
@@ -51,6 +54,10 @@ trait TapePath[S <: TapeFileSystem] { self: S#Path =>
   def isDirectory: Boolean
   def isFile: Boolean
   def isSymLink: Boolean
+
+  // MISC INFOS
+  def modifiedTime: Instant
+
 
   // OVERRIDING JVM MEMBERS
 

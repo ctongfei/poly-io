@@ -24,6 +24,8 @@ object Local extends WritableFileSystem {
     def isWriteable = JFiles.isWritable(jp)
     def isExecutable = JFiles.isExecutable(jp)
 
+    def modifiedTime = JFiles.getLastModifiedTime(jp).toInstant
+
     /** Renames this file or directory or symbolic link. */
     def rename(newName: String) = JFiles.move(jp, jp.resolveSibling(newName))
 

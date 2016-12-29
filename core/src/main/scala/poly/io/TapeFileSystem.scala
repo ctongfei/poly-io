@@ -26,4 +26,6 @@ trait TapeFileSystem { self =>
 
   def files: Iterable[File]
 
+  def directories: Iterable[Directory]
+
 }

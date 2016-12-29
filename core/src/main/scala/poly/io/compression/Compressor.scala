@@ -13,9 +13,21 @@ trait Compressor {
 
 }
 
+object Compressor {
+  object Id extends Compressor {
+    def compress(os: OutputStream) = os
+  }
+}
+
 trait Decompressor {
 
   /** Decompresses this input stream. */
   def decompress(is: InputStream): InputStream
 
+}
+
+object Decompressor {
+  object Id extends Decompressor {
+    def decompress(is: InputStream) = is
+  }
 }

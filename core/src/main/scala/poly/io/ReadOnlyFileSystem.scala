@@ -37,4 +37,6 @@ trait ReadOnlyFileSystem extends TapeFileSystem { self =>
 
   def files: Iterable[File] = root.recursiveFiles
 
+  def directories: Iterable[Directory] = root.recursiveSubdirectories
+
 }
