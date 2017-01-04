@@ -16,15 +16,9 @@ trait ReaderWriterOps {
       def read() = reader.read()
     }
 
-    def asCloseableIterator: CloseableIterator[Char] = new StreamAsCloseableIterator[Char, Int](-1) {
-      def convert(b: Int) = b.toChar
-      def read() = reader.read()
-      def close() = reader.close()
-    }
-
-    def linesIterator: CloseableIterator[String] = {
+    def linesIterator: Iterator[String] = {
       val br = new BufferedReader(reader)
-      new StreamAsCloseableIterator[String, String](null) {
+      new StreamAsIterator[String, String](null) {
         def convert(b: String) = b
         def read() = br.readLine()
         def close() = br.close()

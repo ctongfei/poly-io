@@ -22,6 +22,11 @@ object Bzip2 extends Compressor with Decompressor {
   }
 }
 
+/**
+ * Encapsulates an Xz compressor/decompressor.
+ * @author Tongfei Chen
+ * @since 0.4.0
+ */
 object Xz extends Compressor with Decompressor {
   def compress(os: OutputStream) = new XZCompressorOutputStream(os)
   def decompress(is: InputStream) = new XZCompressorInputStream(is)
@@ -31,14 +36,29 @@ object Xz extends Compressor with Decompressor {
   }
 }
 
+/**
+ * Encapsulates a Snappy decompressor.
+ * @author Tongfei Chen
+ * @since 0.4.0
+ */
 object Snappy extends Decompressor { //
   def decompress(is: InputStream) = new SnappyCompressorInputStream(is)
 }
 
+/**
+ * Encapsulates an LZMA decompressor.
+ * @author Tongfei Chen
+ * @since 0.4.0
+ */
 object Lzma extends Decompressor { // apache-commons-compress does not provide a compressor for Lzma
   def decompress(is: InputStream) = new LZMACompressorInputStream(is)
 }
 
+/**
+ * Encapsulates a Z decompressor.
+ * @author Tongfei Chen
+ * @since 0.4.0
+ */
 object Z extends Decompressor { // apache-commons-compress does not provide a compressor
   def decompress(is: InputStream) = new ZCompressorInputStream(is)
 }

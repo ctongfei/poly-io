@@ -19,12 +19,6 @@ trait IOStreamOps {
       def read() = is.read()
     }
 
-    def asCloseableIterator: CloseableIterator[Byte] = new StreamAsCloseableIterator[Byte, Int](-1) {
-      def convert(b: Int) = b.toByte
-      def read() = is.read()
-      def close() = is.close()
-    }
-
     /** Decompresses this input stream using a decompressor. */
     def decompress(d: Decompressor) = d decompress is
 

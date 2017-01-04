@@ -1,8 +1,8 @@
 package poly.io.archive
 
 import poly.io._
-import org.apache.commons.compress.archivers.tar._
 import poly.io.compression._
+import org.apache.commons.compress.archivers.tar._
 
 /**
  * Encapsulates a tarball as a tape file system, in which files can be read sequentially.
@@ -36,7 +36,8 @@ class TarArchive private[io](inputStream: => InputStream) extends TapeFileSystem
 
   class SymLink private[io](te: TarArchiveEntry) extends Path(te) with TapeSymLink[this.type]
 
-  def paths: AutoCloseableIterable[Path] = new AutoCloseableIterable[Path] {
+  //TODO: TarIterator not closed!
+  def paths: Iterable[Path] = new Iterable[Path] {
     private[this] val ti = new TarIterator(inputStream)
     def iterator = ti.map {
       case te if te.isDirectory => new Directory(te)
@@ -45,14 +46,14 @@ class TarArchive private[io](inputStream: => InputStream) extends TapeFileSystem
     }
   }
 
-  def files: AutoCloseableIterable[File] = new AutoCloseableIterable[File] {
+  def files: Iterable[File] = new Iterable[File] {
     private[this] val ti = new TarIterator(inputStream)
     def iterator = ti.collect {
       case te if te.isFile => new File(te, ti.tarStream)
     }
   }
 
-  def directories: AutoCloseableIterable[Directory] = new AutoCloseableIterable[Directory] {
+  def directories: Iterable[Directory] = new Iterable[Directory] {
     private[this] val ti = new TarIterator(inputStream)
     def iterator = ti.collect {
       case te if te.isDirectory => new Directory(te)
@@ -60,7 +61,7 @@ class TarArchive private[io](inputStream: => InputStream) extends TapeFileSystem
   }
 }
 
-private[io] class TarIterator(tarInputStream: InputStream) extends StreamAsCloseableIterator[TarArchiveEntry, TarArchiveEntry](null) {
+private[io] class TarIterator(tarInputStream: InputStream) extends StreamAsIterator[TarArchiveEntry, TarArchiveEntry](null) {
   private[io] val tarStream = new TarArchiveInputStream(tarInputStream)
   def convert(b: TarArchiveEntry) = b
   def read() = tarStream.getNextTarEntry
