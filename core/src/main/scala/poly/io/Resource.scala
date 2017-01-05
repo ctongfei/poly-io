@@ -33,32 +33,18 @@ trait Resource[+R] { self =>
     }
   }
 
+  def product[S](that: Resource[S]) = for (r <- this; s <- that) yield (r, s)
+
+  def productWith[S, T](that: Resource[S])(f: (R, S) => T) = for (r <- this; s <- that) yield f(r, s)
+
 }
 
 object Resource {
 
-  def ofInputStream(f: => InputStream): Resource[InputStream] = new Resource[InputStream] {
-    private[this] var is: InputStream = _
-    def open() = { is = f; is }
-    def close() = is.close()
-  }
-
-  def ofReader(f: => Reader): Resource[Reader] = new Resource[Reader] {
-    private[this] var r: Reader = _
-    def open() = { r = f; r }
-    def close() = r.close()
-  }
-
-  def ofOutputStream(f: => OutputStream): Resource[OutputStream] = new Resource[OutputStream] {
-    private[this] var os: OutputStream = _
-    def open() = { os = f; os }
-    def close() = os.close()
-  }
-
-  def ofWriter(f: => Writer): Resource[Writer] = new Resource[Writer] {
-    private[this] var w: Writer = _
-    def open() = { w = f; w }
-    def close() = w.close()
+  def ofCloseable[R <: AutoCloseable](f: => R): Resource[R] = new Resource[R] {
+    private[this] var resource: R = _
+    def open = { resource = f; resource }
+    def close() = resource.close()
   }
 
 }

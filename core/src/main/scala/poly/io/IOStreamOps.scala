@@ -12,12 +12,10 @@ import scala.collection.mutable
  */
 trait IOStreamOps {
 
-  implicit class InputStreamOps(val is: InputStream) {
+  implicit class InputStreamOps(val is: InputStream) extends StreamAsIterator[Byte, Int](-1) {
 
-    def asIterator: Iterator[Byte] = new StreamAsIterator[Byte, Int](-1) {
-      def convert(b: Int) = b.toByte
-      def read() = is.read()
-    }
+    def convert(b: Int) = b.toByte
+    def read() = is.read()
 
     /** Decompresses this input stream using a decompressor. */
     def decompress(d: Decompressor) = d decompress is

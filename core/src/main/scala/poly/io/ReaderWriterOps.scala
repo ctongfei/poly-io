@@ -9,12 +9,10 @@ import scala.collection._
  */
 trait ReaderWriterOps {
 
-  implicit class ReaderOps(val reader: Reader) {
+  implicit class ReaderOps(val reader: Reader) extends StreamAsIterator[Char, Int](-1) {
 
-    def asIterator: Iterator[Char] = new StreamAsIterator[Char, Int](-1) {
-      def convert(b: Int) = b.toChar
-      def read() = reader.read()
-    }
+    def convert(b: Int) = b.toChar
+    def read() = reader.read()
 
     def linesIterator: Iterator[String] = {
       val br = new BufferedReader(reader)

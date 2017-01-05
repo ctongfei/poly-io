@@ -12,7 +12,7 @@ trait TapeFile[S <: TapeFileSystem] { self: S#File =>
   /** Opens an input stream to read raw bytes from this file. */
   def inputStream: InputStream
 
-  def managedInputStream = Resource.ofInputStream(inputStream)
+  def managedInputStream = Resource.ofCloseable(inputStream)
 
   /** Opens a reader to read characters from this file given a character encoding. */
   def reader(implicit enc: Codec): java.io.Reader =
@@ -20,20 +20,20 @@ trait TapeFile[S <: TapeFileSystem] { self: S#File =>
 
   def managedReader(implicit enc: Codec) = for {
     is <- managedInputStream
-    r <- Resource.ofReader(new java.io.BufferedReader(new java.io.InputStreamReader(is, enc.charset)))
+    r <- Resource.ofCloseable(new java.io.BufferedReader(new java.io.InputStreamReader(is, enc.charset)))
   } yield r
 
   /** Returns a lazy iterable sequence of raw bytes in this file. */
   def bytes: Resource[Iterable[Byte]] = managedInputStream map { is =>
     new Iterable[Byte] {
-      def iterator = is.asIterator
+      def iterator = is
     }
   }
 
   /** Returns a lazy iterable sequence of characters in this file given a character encoding. */
   def chars(implicit enc: Codec): Resource[Iterable[Char]] = managedReader(enc) map { r =>
     new Iterable[Char] {
-      def iterator = r.asIterator
+      def iterator = r
     }
   }
 

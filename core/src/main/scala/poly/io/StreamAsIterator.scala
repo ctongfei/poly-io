@@ -1,6 +1,10 @@
 package poly.io
 
 /**
+ * Converts a Java InputStream/Reader-type object to an iterator.
+ * @tparam A Type of elements to be read from the stream
+ * @tparam B Type of what [[read()]] function returns
+ * @param eosSymbol An object of type [[B]], when encountered, signifies the end of the stream.
  * @author Tongfei Chen
  * @since 0.4.0
  */
