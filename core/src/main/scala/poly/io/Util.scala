@@ -37,12 +37,6 @@ private[poly] object Util {
     a.toArray
   }
 
-  private[poly] def withResource[R <: java.io.Closeable](r: => R, f: R => Any) = {
-    val resource = r
-    f(resource)
-    resource.close()
-  }
-
   /**
    * A lazy depth-first tree searcher.
    * @author Tongfei Chen

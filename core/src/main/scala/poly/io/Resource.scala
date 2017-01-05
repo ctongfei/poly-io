@@ -10,11 +10,10 @@ trait Resource[+R] { self =>
   def open(): R
   def close()
 
-  def foreach[U](f: R => U) = {
-    val r = open()
-    f(r)
-    close()
-  }
+  def foreach[U](f: R => U) = try {
+      val r = open()
+      f(r)
+    } finally close()
 
   def map[S](f: R => S): Resource[S] = new Resource[S] {
     def open() = f(self.open())
@@ -41,7 +40,7 @@ trait Resource[+R] { self =>
 
 object Resource {
 
-  def ofCloseable[R <: AutoCloseable](f: => R): Resource[R] = new Resource[R] {
+  def apply[R <: AutoCloseable](f: => R): Resource[R] = new Resource[R] {
     private[this] var resource: R = _
     def open = { resource = f; resource }
     def close() = resource.close()

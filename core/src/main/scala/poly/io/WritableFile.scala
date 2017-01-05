@@ -10,11 +10,11 @@ trait WritableFile[S <: WritableFileSystem] extends ReadOnlyFile[S] with Writabl
   /** Opens an output stream to write raw bytes to this file. */
   def outputStream: OutputStream
 
-  def managedOutputStream = Resource.ofCloseable(outputStream)
+  def managedOutputStream = Resource(outputStream)
 
   /** Opens a writer to write characters to this file given a character encoding. */
   def writer(implicit enc: Codec): java.io.Writer =
     new java.io.BufferedWriter(new java.io.OutputStreamWriter(outputStream, enc.charset))
 
-  def managedWriter(implicit enc: Codec) = Resource.ofCloseable(writer(enc))
+  def managedWriter(implicit enc: Codec) = Resource(writer(enc))
 }
