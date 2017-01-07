@@ -4,7 +4,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.4.0
  */
-trait TapeFile[S <: TapeFileSystem] { self: S#File =>
+trait TapeFile[S <: TapeFileSystem] extends TapePath[S] { self: S#File =>
 
   /** Returns the number of bytes in this file. */
   def size: Long
@@ -12,12 +12,14 @@ trait TapeFile[S <: TapeFileSystem] { self: S#File =>
   /** Opens an input stream to read raw bytes from this file. */
   def inputStream: InputStream
 
+  /** Safely opens an input stream to read this file in a managed context ([[Resource]]). */
   def managedInputStream = Resource(inputStream)
 
   /** Opens a reader to read characters from this file given a character encoding. */
   def reader(implicit enc: Codec): java.io.Reader =
     new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, enc.charset))
 
+  /** Safely opens an reader to read this file in a managed context ([[Resource]]). */
   def managedReader(implicit enc: Codec) = for {
     is <- managedInputStream
     r <- Resource(new java.io.BufferedReader(new java.io.InputStreamReader(is, enc.charset)))
