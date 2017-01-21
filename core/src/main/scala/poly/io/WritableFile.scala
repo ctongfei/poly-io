@@ -17,4 +17,5 @@ trait WritableFile[S <: WritableFileSystem] extends ReadOnlyFile[S] with Writabl
     new java.io.BufferedWriter(new java.io.OutputStreamWriter(outputStream, enc.charset))
 
   def managedWriter(implicit enc: Codec) = Resource(writer(enc))
+
 }

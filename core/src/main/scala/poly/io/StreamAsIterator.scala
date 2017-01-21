@@ -1,5 +1,7 @@
 package poly.io
 
+import scala.collection._
+
 /**
  * Converts a Java InputStream/Reader-type object to an iterator.
  * @tparam A Type of elements to be read from the stream
@@ -8,7 +10,7 @@ package poly.io
  * @author Tongfei Chen
  * @since 0.4.0
  */
-abstract class StreamAsIterator[@specialized(Byte, Char) A, @specialized(Int) B](val eosSymbol: B) extends Iterator[A] {
+abstract class StreamAsIterator[@specialized(Byte, Char) A, @specialized(Int) B](val eosSymbol: B) extends AbstractIterator[A] {
 
   private[this] var nextItem: B = eosSymbol
 

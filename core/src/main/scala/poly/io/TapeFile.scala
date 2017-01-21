@@ -49,7 +49,13 @@ trait TapeFile[S <: TapeFileSystem] extends TapePath[S] { self: S#File =>
   /** Reads all content of this file to a string. */
   def slurp(implicit enc: Codec): String = {
     val sb = new StringBuilder
-    for (cs <- chars(enc); c <- cs) sb append c
+    for (is <- managedReader(enc)) {
+      var c = 0
+      while (c != -1) {
+        c = is.read()
+        sb += c.toChar
+      }
+    }
     sb.result()
   }
 

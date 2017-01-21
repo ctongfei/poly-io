@@ -82,4 +82,5 @@ trait Ops {
       def result() = writer.close()
     }
   }
+
 }

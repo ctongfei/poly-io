@@ -15,7 +15,7 @@ trait Resource[+R] { self =>
 
   /**
    * Performs an operation on the resource, and close it after use.
-   * Normally used with `for` clause:
+   * Normally used with `for` clause (similar to the Java try-with-resource clause):
    * @example {{{
    *   for (r <- someResource) {
    *     ...
@@ -23,7 +23,7 @@ trait Resource[+R] { self =>
    * }}}
    * The resource will automatically be closed after the end of the `for` clause.
    */
-  def foreach[U](f: R => U): Unit = {
+  def foreach[S](f: R => S) = {
     val r = open()
     try f(r) finally close()
   }
